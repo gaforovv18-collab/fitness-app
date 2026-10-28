@@ -346,5 +346,6 @@ $('nav').onclick=function(e){var b=e.target.closest('button');if(!b)return;var t
  document.querySelectorAll('nav button').forEach(function(x){x.classList.toggle('on',x===b)});
  document.querySelectorAll('.sec').forEach(function(s){s.classList.toggle('on',s.id==='s-'+t)});window.scrollTo(0,0)};
 fill();renderAll();permTxt();check();setInterval(check,15000);
+var tb=document.querySelector('nav [data-t="'+location.hash.slice(1)+'"]');if(tb)tb.click();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
 </script></body></html>
