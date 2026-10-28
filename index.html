@@ -937,16 +937,20 @@ function pushSync(force){
  }).catch(function(e){PUSHON=false;pushErr=String(e&&e.message||e).slice(0,80);permTxt()});
 }
 function pushOff(){
- try{fetch(PUSH_URL+'/unsub',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:PID})})}catch(e){}
- try{navigator.serviceWorker.ready.then(function(r){return r.pushManager.getSubscription()}).then(function(x){x&&x.unsubscribe()})}catch(e){}
+ var a=Promise.resolve(),b=Promise.resolve();
+ try{a=fetch(PUSH_URL+'/unsub',{method:'POST',keepalive:true,headers:{'Content-Type':'application/json'},body:JSON.stringify({id:PID})}).catch(function(){})}catch(e){}
+ try{b=navigator.serviceWorker.ready.then(function(r){return r.pushManager.getSubscription()}).then(function(x){return x&&x.unsubscribe()}).catch(function(){})}catch(e){}
+ return Promise.all([a,b]);
 }
 
 /* ===== переезд со старого адреса GitHub Pages: данные передаются в адресе ссылки, без сервера ===== */
 var NEWURL='https://fitness-makedon.pages.dev/',OLDHOST=/github\.io$/.test(location.hostname);
 function moveOut(){
  var o={};Object.keys(localStorage).forEach(function(k){if(k.indexOf('fit_')===0&&['fit_psh','fit_pid','fit_moved','fit_noinst'].indexOf(k)<0)o[k]=localStorage.getItem(k)});
- pushOff();sv('fit_moved',1);PUSHON=false;
- location.href=NEWURL+'#import='+encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(o)))));
+ sv('fit_moved',1);PUSHON=false;$('moveGo').disabled=true;$('moveGo').textContent='Переносим…';
+ var url=NEWURL+'#import='+encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(o))))),gone=false;
+ function nav(){if(!gone){gone=true;location.href=url}}
+ pushOff().then(nav,nav);setTimeout(nav,4000);
 }
 function moveIn(){
  var m=location.hash.match(/^#import=(.+)$/);if(!m)return false;
@@ -969,6 +973,6 @@ if(!moveIn()){
 fill();renderAll();permTxt();check();setInterval(check,15000);
 var hh=location.hash.slice(1);hh={water:'today',sleep:'today'}[hh]||hh;if(hh)go(hh);
 if(!ld('fit_onb',0)&&!/nowiz/.test(location.search)||/[?&]wiz/.test(location.search))wizOpen();
-if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').then(function(){pushSync()}).catch(function(){});
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').then(function(){if(ld('fit_moved',0))pushOff();else pushSync()}).catch(function(){});
 }
 </script></body></html>
