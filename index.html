@@ -22,7 +22,11 @@ input,select{width:100%;padding:9px;border:1px solid var(--bd);border-radius:9px
 .chips{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;padding-bottom:4px}
 .chip{border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:20px;padding:6px 12px;white-space:nowrap;cursor:pointer;font-size:14px}
 .chip.on{background:var(--ac);color:#04200f;border-color:var(--ac)}
-.ex{display:flex;gap:12px;align-items:center}.ex svg{flex:0 0 46%;width:46%;max-width:240px;aspect-ratio:10/7;height:auto;background:var(--ac2);border-radius:10px}.ex>div{flex:1;min-width:0;overflow-wrap:break-word}
+.ex{display:flex;gap:12px;align-items:center}.ex svg{flex:0 0 46%;width:46%;max-width:240px;aspect-ratio:10/7;height:auto;background:var(--ac2);border-radius:10px}.ex>div{flex:1;min-width:0;overflow-wrap:break-word}.ex svg{cursor:zoom-in}
+.mus{margin:4px 0 2px;font-size:13px}.mus span{display:inline-block;margin-right:8px;color:#e11d1d;font-weight:600}.mus span::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:#e11d1d;margin-right:4px}
+#big{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:20;display:flex;align-items:center;justify-content:center;padding:16px}#big[hidden]{display:none}
+.bigc{position:relative;background:var(--card);border-radius:16px;padding:14px;width:100%;max-width:960px;max-height:100%;overflow:auto}#bigsv{width:100%;height:auto;aspect-ratio:10/7;background:var(--ac2);border-radius:12px;display:block}
+#bigx{position:absolute;top:20px;right:20px;width:36px;height:36px;border-radius:50%;border:0;background:var(--card);color:var(--tx);font-size:18px;cursor:pointer}
 .tag{display:inline-block;background:var(--ac2);color:var(--ac);border-radius:6px;padding:1px 7px;font-size:12px;margin-right:4px}
 ul{margin:4px 0;padding-left:20px}li{margin:2px 0}
 .bar{height:14px;background:var(--bd);border-radius:8px;overflow:hidden;margin:8px 0}.bar i{display:block;height:100%;background:var(--wa);width:0;transition:width .3s}
@@ -31,6 +35,8 @@ ul{margin:4px 0;padding-left:20px}li{margin:2px 0}
 .row{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--bd)}.row:last-child{border:0}
 </style></head><body>
 <div id="toast"></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><radialGradient id="gsh" cx=".38" cy=".3" r=".8"><stop offset="0" stop-color="#fff" stop-opacity=".5"/><stop offset=".35" stop-color="#fff" stop-opacity=".08"/><stop offset=".7" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".38"/></radialGradient></defs></svg>
+<div id="big" hidden><div class="bigc"><button id="bigx" aria-label="Закрыть">✕</button><svg viewBox="0 0 100 70" id="bigsv"></svg><h2 id="bigt" style="margin-top:10px"></h2><div id="bigm"></div><div class="mu" id="bigd"></div></div></div>
 <main>
 <h1>💪 Мой фитнес-помощник</h1>
 
@@ -179,7 +185,7 @@ function ik(s,o,l1,l2){
  var a1=ang(s,o.p)+o.b*Math.acos((l1*l1+d*d-l2*l2)/(2*l1*d))*180/Math.PI;
  return[a1,ang(add(s,a1,l1),o.p)]
 }
-function roots(h,t,fv,i){var s=add(h,t,LEN.t),sd=t+(i?-90:90);return fv?[add(s,sd,4.6),add(h,sd,2.8)]:[s,h]}
+function roots(h,t,fv,i){var s=add(h,t,LEN.t),sd=t+(i?-90:90);return fv?[add(s,sd,6),add(h,sd,2.8)]:[s,h]}
 function canon(P){
  var c={h:P.h,t:P.t,hd:P.hd||0,fv:P.fv,A:[],L:[],F:[]};
  for(var i=0;i<2;i++){
@@ -206,47 +212,111 @@ function joints(c){
  }
  return J
 }
-/* объёмная отрисовка: каждый сегмент — капсула с бликом и тенью */
-var NEAR={sk:'#f2c79b',sh:'#2563eb',pn:'#1f2937',bt:'#ef4444'},FAR={sk:'#d29d72',sh:'#1e3a8a',pn:'#0b1220',bt:'#a51d1d'};
+/* анатомическая фигура: каждый сегмент нарисован в своей системе координат (кость вдоль +y, перед тела — +x),
+   при движении меняются только повороты групп, а рабочие мышцы (data-m) краснеют вместе с усилием */
 function n2(v){return v.toFixed(2)}
-function lerp(p,q,u){return[p[0]+(q[0]-p[0])*u,p[1]+(q[1]-p[1])*u]}
-function cap(p,r1,q,r2,col){
- var dx=q[0]-p[0],dy=q[1]-p[1],l=Math.hypot(dx,dy)||.01,nx=-dy/l,ny=dx/l,lt=nx*-.6+ny*-.8>0?1:-1;
- function pt(o,r,s){return n2(o[0]+nx*r*s)+' '+n2(o[1]+ny*r*s)}
- function ln(s,c,op,w){return '<path d="M'+pt(p,r1*.5,s)+'L'+pt(q,r2*.5,s)+'" stroke="'+c+'" stroke-opacity="'+op+'" stroke-width="'+n2(Math.min(r1,r2)*w)+'" stroke-linecap="round"/>'}
- return '<path d="M'+pt(p,r1,1)+'L'+pt(q,r2,1)+'A'+r2+' '+r2+' 0 0 0 '+pt(q,r2,-1)+'L'+pt(p,r1,-1)+'A'+r1+' '+r1+' 0 0 0 '+pt(p,r1,1)+'Z" fill="'+col+'" stroke="#000" stroke-opacity=".3" stroke-width=".35"/>'+
-  ln(-lt,'#000',.16,.6)+ln(lt,'#fff',.32,.5)
+function sm(P){var n=P.length,d='M'+P[0][0]+' '+P[0][1];
+ for(var i=0;i<n;i++){var a=P[(i+n-1)%n],b=P[i],c=P[(i+1)%n],e=P[(i+2)%n];
+  d+='C'+n2(b[0]+(c[0]-a[0])/6)+' '+n2(b[1]+(c[1]-a[1])/6)+' '+n2(c[0]-(e[0]-b[0])/6)+' '+n2(c[1]-(e[1]-b[1])/6)+' '+c[0]+' '+c[1]}
+ return d+'Z'}
+function mx(P){return P.map(function(p){return[-p[0],p[1]]})}
+function MS(P,m,c){return{d:sm(P),m:m,c:c||'sk'}}
+var BODY={
+ ua:[MS([[-2.3,0],[-1.6,-1.8],[0,-2.3],[1.6,-1.8],[2.3,0],[2.2,5],[1.7,10.5],[0,11.9],[-1.7,10.5],[-2.2,5]]),
+  MS([[-.3,3.2],[-1.6,2.6],[-2.7,4.2],[-2.9,6.6],[-2.3,9],[-1.2,10.6],[-.4,9.6],[-.5,6.5]],'triceps'),
+  MS([[.4,3.6],[1.8,3.4],[2.9,5.4],[2.9,7.6],[2.1,9.6],[1,10.6],[.3,9.4],[.2,6.5]],'biceps'),
+  MS([[-2.8,.5],[-2.4,-1.8],[-.6,-3.1],[1.6,-2.8],[3,-1],[3.1,1.5],[2.2,3.8],[.7,5.4],[-.6,5],[-1.8,3.5]],'delts'),
+  {l:'M1.5 -2.5Q1.4 1 .7 5.1M-1.5 -2.2Q-1.2 1.2 -.6 4.8M-1 6.6Q-2 7.8 -1.2 10M2 5.2Q1.4 7.5 1.9 9.4'}],
+ fa:[MS([[-1.9,-.5],[0,-1.9],[1.9,-.5],[1.6,6],[1.2,10],[0,10.8],[-1.2,10],[-1.5,6]]),
+  MS([[-1.9,.3],[-.6,-1.2],[1.5,-.8],[2.5,1.6],[2.2,4.8],[1.3,7.5],[.2,7.2],[-1.2,6],[-2,3]],'forearm'),
+  {l:'M.3 0Q.8 3.5 .4 7M-1.2 1.5Q-1.5 4 -1 6.5'}],
+ hand:[MS([[-1.4,9.6],[1.3,9.5],[1.8,10.8],[1.4,12.2],[0,12.6],[-1.4,12],[-1.7,10.8]]),{l:'M1.5 11.2Q0 11.7 -1.4 11.3'}],
+ tr:[MS([[-4.8,1.5],[-5.4,-3],[-5.9,-8],[-6,-12.5],[-5.2,-16.5],[-3.4,-19.6],[-.5,-20.5],[2.5,-19],[4.8,-17.2],[6.2,-14.5],[5.9,-11.5],[4.6,-10],[4.4,-6],[4,-2],[3.8,1.5],[0,2.5]]),
+  MS([[-5,-4],[-5.9,-8.5],[-6.1,-12.8],[-5,-15.8],[-2.6,-15.4],[-1.6,-11.5],[-2.4,-7]],'lats'),
+  MS([[-4.9,-.5],[-5.3,-4.8],[-3.4,-6.5],[-2.8,-2]],'lowback'),
+  MS([[-2.5,-1.5],[-2.4,-6.5],[-1.2,-10.8],[1.4,-10.2],[2.2,-5],[1.6,-1]],'obl'),
+  MS([[1.6,-.6],[2.3,-5],[1.9,-10.2],[4.4,-10.3],[4.6,-7.6],[4.4,-5],[4.1,-2.4],[3.7,0]],'abs'),
+  MS([[1.4,-10],[4.6,-10.1],[6.3,-12.3],[6.2,-15.2],[4.5,-17.6],[1.6,-17.8],[.6,-14],[.8,-11.5]],'chest'),
+  MS([[-5.1,-15.6],[-3.6,-19.7],[-1,-21],[.6,-19.6],[-1.6,-17.4],[-3.2,-15.5]],'traps'),
+  {l:'M-.8 -10.2L.9 -9.6M-1.1 -8.6L1.2 -8M-1 -7L1.3 -6.5M2.2 -2.6Q3.3 -2.3 4.1 -2.6M2.2 -5.2Q3.4 -4.8 4.4 -5.1M2.1 -7.8Q3.4 -7.4 4.6 -7.7M-3.6 -12Q-2.8 -9 -3.4 -6.5'},
+  MS([[-5.1,-2.6],[-6.4,.5],[-5.8,3.5],[-3.4,4.6],[0,4.6],[3.5,4.2],[4.2,1.5],[4,-2.4],[0,-1.8]],0,'tr'),
+  MS([[-5.1,-2.4],[-6.4,.6],[-5.7,3.4],[-3.2,4.2],[-2.2,1],[-3,-1.8]],'glutes','tr')],
+ hd:[MS([[-2.4,.5],[-2.2,-4],[1.6,-4.2],[2.4,.3]]),{l:'M-1 -.2Q.4 -2 1.3 -4'},
+  MS([[-4.2,-6.3],[-3.6,-9.6],[-1.2,-11.3],[1.8,-11],[3.6,-9.6],[4.2,-8.1],[4.1,-7.3],[5.2,-6.1],[4.4,-5.6],[4.6,-4.9],[4.3,-4.4],[4.5,-3.3],[3.4,-2.5],[1.2,-2.6],[-.7,-3.4],[-2.8,-3.6]]),
+  MS([[-4.3,-6.4],[-3.8,-9.8],[-1.2,-11.6],[1.9,-11.3],[3.7,-9.8],[3.3,-9.2],[1,-10],[-1.5,-9.6],[-2.6,-7.5],[-3.5,-5.5]],0,'hr'),
+  MS([[-1.3,-7.4],[-.3,-7.6],[0,-6.2],[-.6,-5.2],[-1.3,-5.6]]),
+  MS([[2.4,-7.3],[3.4,-7.5],[3.5,-7],[2.6,-6.9]],0,'ey'),{l:'M2 -8.2Q3 -8.6 4 -8.1M3.6 -4.8L4.4 -4.9M-.9 -6.9Q-.5 -6.4 -.8 -5.8'}],
+ th:[MS([[-3.5,0],[-2,-2.5],[2,-2.5],[3.6,0],[3.9,5],[3.2,10],[2.2,14],[0,15.5],[-2,14],[-3.2,10],[-3.8,5]]),
+  MS([[-.3,3],[-3.4,2.5],[-4,6.5],[-3.4,10.5],[-2.2,13.6],[-.6,13],[-.4,8]],'hams'),
+  MS([[.2,2.5],[3.4,2.2],[4.2,6],[3.8,10],[2.6,12.6],[.8,12.4],[.1,8]],'quads'),
+  MS([[.6,11.2],[2.6,11.4],[3,13.4],[1.8,15],[.4,14.2]],'quads'),
+  {l:'M1.7 3Q2.3 7.5 1.6 12M-1.6 3Q-1.9 8 -1.2 13'},
+  MS([[-3.9,-1.5],[3.9,-1.5],[4.2,3.4],[0,4.2],[-4.2,3.6]],0,'tr')],
+ sh:[MS([[-2.4,-.5],[0,-2.3],[2.3,-.6],[2,6],[1.2,13.5],[0,14.6],[-1.2,13.5],[-2,7]]),
+  MS([[-.4,1.2],[-2.6,1.6],[-3.6,4.6],[-3.1,7.6],[-1.6,10.4],[-.6,9.6],[-.4,5]],'calves'),
+  MS([[.4,1.5],[2.3,1.4],[2.2,5.5],[1.4,9.5],[.5,9]]),
+  MS([[-.2,-1.4],[1.6,-1.6],[2.4,.2],[1.2,1.4],[-.1,.6]]),{l:'M-1.5 2.5Q-2.4 5 -1.4 8.5'}],
+ ft:[MS([[-1.7,-1.4],[1.3,-1.2],[1.9,1.2],[1.5,3.6],[.4,5],[-1.5,5],[-1.9,2]],0,'so'),
+  MS([[-1.2,-1.3],[1.3,-1.2],[1.9,1.2],[1.5,3.6],[.4,4.8],[-1.1,4.7]],0,'shoe'),{l:'M.8 .4L1.6 1.3M.6 1.6L1.4 2.4'}]
+};
+/* анфас: корпус и голова симметричные */
+(function(){
+ var B=[[0,3],[4,3.2],[4.6,-2],[4.6,-6],[5.6,-10],[7.4,-14],[7.6,-17],[5.5,-19],[2,-19.8],[0,-20]],
+  full=B.concat(mx(B).reverse().slice(1,-1)),t=[MS(full)];
+ function both(P,m,c){t.push(MS(P,m,c),MS(mx(P),m,c))}
+ both([[5.2,-10],[6.8,-13.5],[7.6,-15.5],[7.2,-11.5],[5.6,-8]],'lats');
+ both([[2.7,-9],[4.9,-9.5],[4.8,-3],[4.2,1],[2.6,-.5],[2.8,-5]],'obl');
+ [[-10.2,-7.6],[-7.4,-4.9],[-4.7,-2.2]].forEach(function(r){both([[.3,r[0]],[2.3,r[0]+.1],[2.6,(r[0]+r[1])/2],[2.3,r[1]],[.3,r[1]]],'abs')});
+ both([[.3,-2],[2.4,-2],[2,1.5],[.3,2.6]],'abs');
+ both([[2,-18.2],[5.4,-18.6],[7,-17.8],[4,-19.8],[1.6,-20.4]],'traps');
+ both([[.3,-11],[4.3,-10.6],[6.4,-12.8],[6.6,-16],[4.2,-17.8],[.4,-17.4]],'chest');
+ var T=[[0,-2.2],[4.8,-2.2],[5.1,3.5],[3.2,4.6],[0,5]];t.push(MS(T.concat(mx(T).reverse().slice(1,-1)),0,'tr'));
+ BODY.trF=t;
+ var F=[[0,-11.4],[3.2,-10.3],[4,-7.5],[3.6,-4.4],[2.2,-2.7],[0,-2.2]],H=[[0,-11.8],[3.4,-10.6],[4.2,-8],[3.4,-8.6],[0,-9.8]];
+ BODY.hdF=[MS([[-2.4,.5],[-2.6,-3.8],[2.6,-3.8],[2.4,.5]]),{l:'M-1.6 0Q-.6 -2 -.3 -3.6M1.6 0Q.6 -2 .3 -3.6'},
+  MS([[3.6,-7.4],[4.6,-7.6],[4.6,-5.6],[3.8,-5.2]]),MS([[-3.6,-7.4],[-4.6,-7.6],[-4.6,-5.6],[-3.8,-5.2]]),
+  MS(F.concat(mx(F).reverse().slice(1,-1))),MS(H.concat(mx(H).reverse().slice(1,-1)),0,'hr'),
+  MS([[1,-7.3],[2.2,-7.3],[2.2,-6.8],[1,-6.8]],0,'ey'),MS([[-1,-7.3],[-2.2,-7.3],[-2.2,-6.8],[-1,-6.8]],0,'ey'),
+  {l:'M.8 -8.2L2.5 -8.3M-.8 -8.2L-2.5 -8.3M0 -6.4L.4 -5.2L-.2 -5M-1 -3.9Q0 -3.6 1 -3.9'}];
+})();
+var PAL=[{sk:'#c47a45',tr:'#1e293b',shoe:'#374151',so:'#f3f4f6',hr:'#1c1917',ey:'#111'},
+ {sk:'#93572d',tr:'#0b1220',shoe:'#1f2937',so:'#9ca3af',hr:'#0c0a09',ey:'#000'}],RED=[225,29,29];
+function part(L,pal){return L.map(function(e){
+ if(e.l)return '<path d="'+e.l+'" fill="none" stroke="#2a1205" stroke-opacity=".5" stroke-width=".22" stroke-linecap="round"/>';
+ var c=pal[e.c];return '<path d="'+e.d+'" fill="'+c+'"'+(e.m?' data-m="'+e.m+'" data-c="'+c+'"':'')+' stroke="#1f0d03" stroke-opacity=".55" stroke-width=".25"/>'+
+  (e.c==='ey'?'':'<path d="'+e.d+'" fill="url(#gsh)" pointer-events="none"/>')}).join('')}
+function tint(hex,k){var o='#';for(var i=0;i<3;i++){var v=parseInt(hex.substr(1+i*2,2),16);v=Math.round(v+(RED[i]-v)*k);o+=(v<16?'0':'')+v.toString(16)}return o}
+var CHAIR='<g fill="#a8a29e" stroke="#000" stroke-opacity=".3" stroke-width=".35"><rect x="12" y="20" width="2.6" height="42" rx="1"/><rect x="31.5" y="43" width="2.6" height="19" rx="1"/><rect x="11" y="41.4" width="24" height="2.8" rx="1.2" fill="#d6d3d1"/></g>',
+ PACK='<rect x="-3.4" y=".6" width="6.8" height="7.5" rx="1.8" fill="#b45309" stroke="#000" stroke-opacity=".3" stroke-width=".35"/><rect x="-3.4" y=".6" width="6.8" height="2.8" rx="1.4" fill="#92400e"/><path d="M-1.6 .8Q0 -1.2 1.6 .8" fill="none" stroke="#78350f" stroke-width=".6"/>',
+ BOTTLE='<rect x="-3.8" y="10" width="7.6" height="2.4" rx="1.1" fill="#38bdf8" stroke="#0369a1" stroke-width=".3"/>';
+/* собрать фигуру один раз */
+function build(sv,x){
+ var fv=x.c[0].fv,pr=x[6],act=x[7]||[];
+ function g(id,h){return '<g data-g="'+id+'">'+h+'</g>'}
+ function leg(i,p){return g('t'+i,part(BODY.th,p))+g('s'+i,part(BODY.sh,p))+g('p'+i,part(BODY.ft,p))}
+ function arm(i,p){return g('u'+i,part(BODY.ua,p))+g('f'+i,part(BODY.fa,p)+(pr==='bottle'?BOTTLE:'')+part(BODY.hand,p))}
+ var o='<rect x="-20" y="'+GY+'" width="140" height="10" fill="#000" fill-opacity=".08"/><ellipse data-g="sh" cy="'+(GY+.4)+'" ry="1.5" fill="#000" fill-opacity=".22"/>'+(pr==='chair'?CHAIR:'');
+ var P=PAL[0],F=fv?P:PAL[1];
+ if(fv)o+=leg(0,P)+leg(1,P)+g('T',part(BODY.trF,P))+arm(0,P)+arm(1,P)+g('H',part(BODY.hdF,P));
+ else o+=leg(1,F)+arm(1,F)+g('T',part(BODY.tr,P))+g('H',part(BODY.hd,P))+leg(0,P)+(pr==='pack'?g('k',PACK):'')+arm(0,P);
+ sv.innerHTML=o;
+ sv._g={};sv.querySelectorAll('[data-g]').forEach(function(e){sv._g[e.getAttribute('data-g')]=e});
+ sv._a=[].filter.call(sv.querySelectorAll('[data-m]'),function(e){return act.indexOf(e.getAttribute('data-m'))>=0});
+ sv._x=x;
 }
-function ball(p,r,col){return '<circle cx="'+n2(p[0])+'" cy="'+n2(p[1])+'" r="'+r+'" fill="'+col+'" stroke="#000" stroke-opacity=".3" stroke-width=".35"/>'}
-function leg(g,c){return cap(g.h,3,g.k,2.3,c.sk)+cap(g.h,3.4,lerp(g.h,g.k,.55),2.95,c.pn)+cap(g.k,2.3,g.a,1.6,c.sk)+cap(g.a,1.7,g.t,1.2,c.bt)}
-function arm(g,c,prop){
- var o=cap(g.s,2.05,g.e,1.7,c.sk)+cap(g.s,2.45,lerp(g.s,g.e,.45),2.2,c.sh)+cap(g.e,1.7,g.w,1.3,c.sk)+ball(g.w,1.6,c.sk);
- if(prop==='bottle'){var a=ang(g.e,g.w)+90;o+=cap(add(g.w,a,-3),1.25,add(g.w,a,3),1.25,'#38bdf8')+ball(g.w,1.6,c.sk)}
- return o
-}
-function pack(w){return '<rect x="'+n2(w[0]-3.4)+'" y="'+n2(w[1]+.6)+'" width="6.8" height="7.5" rx="1.8" fill="#b45309" stroke="#000" stroke-opacity=".3" stroke-width=".35"/><rect x="'+n2(w[0]-3.4)+'" y="'+n2(w[1]+.6)+'" width="6.8" height="2.8" rx="1.4" fill="#92400e"/>'}
-var CHAIR='<g fill="#a8a29e" stroke="#000" stroke-opacity=".3" stroke-width=".35"><rect x="12" y="20" width="2.6" height="42" rx="1"/><rect x="31.5" y="43" width="2.6" height="19" rx="1"/><rect x="11" y="41.4" width="24" height="2.8" rx="1.2" fill="#d6d3d1"/></g>';
-function head(J,c){
- var up=c.t+c.hd,hc=J.hc,f=D(up+90),u=D(up),o='';
- function P(a,b){return[hc[0]+f[0]*a+u[0]*b,hc[1]+f[1]*a+u[1]*b]}
- if(c.fv){
-  o=ball(P(0,.5),4.5,'#4a2f1b')+ball(P(0,-.4),4.05,NEAR.sk)+ball(P(1.5,.1),.55,'#1f2937')+ball(P(-1.5,.1),.55,'#1f2937');
- }else{
-  o=ball(P(3.7,-.2),1,NEAR.sk)+ball(hc,4.5,'#4a2f1b')+ball(P(.85,-.55),4.05,NEAR.sk)+ball(P(2.6,.5),.55,'#1f2937')+ball(P(-.6,-.4),1,FAR.sk);
- }
- return o+'<circle cx="'+n2(hc[0]-1.4)+'" cy="'+n2(hc[1]-1.7)+'" r="1.4" fill="#fff" fill-opacity=".28"/>'
-}
-function fig(c,prop){
- var J=joints(c),xs=[J.h[0],J.s[0],J.hc[0]];
- J.A.concat(J.L).forEach(function(g){for(var k in g)xs.push(g[k][0])});
- var x0=Math.min.apply(0,xs),x1=Math.max.apply(0,xs),
-  o='<rect x="0" y="'+GY+'" width="100" height="8" fill="#000" fill-opacity=".08"/><ellipse cx="'+n2((x0+x1)/2)+'" cy="'+(GY+.4)+'" rx="'+n2((x1-x0)/2+3)+'" ry="1.5" fill="#000" fill-opacity=".2"/>';
- if(prop==='chair')o+=CHAIR;
- var neck=cap(J.s,1.8,add(J.s,c.t+c.hd,3.3),1.7,NEAR.sk),
-  torso=cap(J.h,c.fv?5.2:4.5,J.s,c.fv?6.2:4.9,NEAR.sh)+cap(add(J.h,c.t,-1),c.fv?5.6:4.8,add(J.h,c.t,4),c.fv?5.4:4.6,NEAR.pn);
- if(c.fv)return o+leg(J.L[0],NEAR)+leg(J.L[1],NEAR)+neck+torso+arm(J.A[0],NEAR,prop)+arm(J.A[1],NEAR,prop)+head(J,c);
- return o+leg(J.L[1],FAR)+arm(J.A[1],FAR,prop==='bottle'?prop:'')+neck+torso+head(J,c)+leg(J.L[0],NEAR)+
-  (prop==='pack'?pack(J.A[0].w):'')+arm(J.A[0],NEAR,prop);
+/* поставить позу c; u — фаза усилия 0..1 */
+function pose(sv,c,u){
+ var J=joints(c),G=sv._g;
+ function tf(id,p,a,m){G[id].setAttribute('transform','translate('+n2(p[0])+' '+n2(p[1])+') rotate('+n2(a)+')'+(m?' scale(-1 1)':''))}
+ tf('T',J.h,c.t);tf('H',J.s,c.t+c.hd);
+ for(var i=0;i<2;i++){var m=c.fv&&i,A=J.A[i],L=J.L[i];
+  tf('u'+i,A.s,c.A[i][0]-180,m);tf('f'+i,A.e,c.A[i][1]-180,m);
+  tf('t'+i,L.h,c.L[i][0]-180,m);tf('s'+i,L.k,c.L[i][1]-180,m);tf('p'+i,L.a,c.F[i]-180,m)}
+ if(G.k)G.k.setAttribute('transform','translate('+n2(J.A[0].w[0])+' '+n2(J.A[0].w[1]+1.4)+')');
+ var xs=[J.h[0],J.s[0],J.hc[0]];J.A.concat(J.L).forEach(function(g){for(var k in g)xs.push(g[k][0])});
+ var x0=Math.min.apply(0,xs),x1=Math.max.apply(0,xs);
+ G.sh.setAttribute('cx',n2((x0+x1)/2));G.sh.setAttribute('rx',n2((x1-x0)/2+3));
+ var k=.35+.65*u;sv._a.forEach(function(e){e.setAttribute('fill',tint(e.getAttribute('data-c'),k))});
 }
 function M(b,o){return Object.assign({},b,o)}
 var FT=[52,59.8],BK=[48,59.8],
@@ -254,45 +324,52 @@ var FT=[52,59.8],BK=[48,59.8],
  PU={h:[42.8,47],t:65,A:[{p:[59,59.6],b:1},{p:[57.5,59.6],b:1}],L:[{p:[17,57.6],b:-1},{p:[15.5,57.6],b:-1}]},
  PL={h:[45.8,52.7],t:77,A:[[180,90],[182,90]],L:[{p:[18,57.6],b:-1},{p:[16.5,57.6],b:-1}]},
  MC={h:[42,45.5],t:66,A:[{p:[59,59.6],b:1},{p:[57.5,59.6],b:1}]},
- BACK={h:[52,57.4],t:270,A:[[95,92],[97,94]],L:[{p:[70,59.6],b:-1},{p:[72,59.6],b:-1}],fa:[93,93]};
+ BACK={h:[52,56],t:270,A:[[95,92],[97,94]],L:[{p:[70,59.6],b:-1},{p:[72,59.6],b:-1}],fa:[93,93]};
 var X=[
 ['Отжимания','Грудь','3×10–15','Руки чуть шире плеч, корпус прямой, опускайтесь до угла 90° в локтях. Тяжело — отжимайтесь с колен.',PU,M(PU,{h:[44.8,52.6],t:77})],
 ['Алмазные отжимания','Грудь','3×8–12','Ладони вместе под грудью, локти вдоль корпуса. Работают грудь и трицепс.',M(PU,{A:[{p:[56,59.6],b:1},{p:[55,59.6],b:1}]}),M(PU,{h:[44.8,52.6],t:79,hd:-6,A:[{p:[56,59.6],b:1},{p:[55,59.6],b:1}]})],
-['Лодочка (супермен)','Спина','3×12','Лёжа на животе одновременно поднимите руки и ноги, задержитесь на 2 секунды.',{h:[47,57.4],t:90,A:[[96,92],[98,94]],L:[[270,270],[268,270]],f:[0,0]},{h:[47,57.4],t:76,hd:-12,A:[[72,74],[75,77]],L:[[284,284],[281,281]],f:[0,0]}],
+['Лодочка (супермен)','Спина','3×12','Лёжа на животе одновременно поднимите руки и ноги, задержитесь на 2 секунды.',{h:[47,55.8],t:90,A:[[96,92],[98,94]],L:[[270,270],[268,270]],f:[0,0]},{h:[47,55.8],t:76,hd:-12,A:[[72,74],[75,77]],L:[[284,284],[281,281]],f:[0,0]}],
 ['Тяга рюкзака в наклоне','Спина','3×12','Наклон корпуса вперёд, спина ровная. Тяните рюкзак с книгами к поясу, сводя лопатки.',{h:[44,35],t:58,hd:-30,A:[[180,178],[182,180]],L:[{p:[50,59.8],b:-1},{p:[46,59.8],b:-1}]},{h:[44,35],t:58,hd:-30,A:[[245,160],[247,162]],L:[{p:[50,59.8],b:-1},{p:[46,59.8],b:-1}]},'pack'],
 ['Отжимания «горка»','Плечи','3×8–10','Таз высоко, тело домиком. Опускайте макушку к полу, сгибая локти.',{h:[34,34.5],t:130,A:[{p:[62.5,59.6],b:1},{p:[61,59.6],b:1}],L:[{p:[18.6,58.3],b:-1},{p:[17.2,58.3],b:-1}]},{h:[36,36],t:128,hd:-10,A:[{p:[62.5,59.6],b:1},{p:[61,59.6],b:1}],L:[{p:[18.6,58.3],b:-1},{p:[17.2,58.3],b:-1}]}],
 ['Подъём рук с бутылками','Плечи','3×15','В руках бутылки с водой. Поднимайте прямые руки до уровня плеч, без раскачки.',{fv:1,h:[50,31.5],t:0,A:[[172,176],[188,184]],L:[[178,180],[182,180]]},{fv:1,h:[50,31.5],t:0,A:[[92,90],[268,270]],L:[[178,180],[182,180]]},'bottle'],
 ['Сгибание рук с рюкзаком','Руки','3×12','Локти прижаты к корпусу. Поднимайте рюкзак к плечу, медленно опускайте.',M(STD,{A:[[178,176],[186,183]]}),M(STD,{A:[[172,25],[186,183]]}),'pack'],
 ['Отжимания от стула','Руки','3×10–15','Руки на краю стула за спиной. Опускайтесь до угла 90° в локтях. Прорабатывает трицепс.',{h:[38,38],t:352,A:[{p:[32,39.8],b:1},{p:[31,39.8],b:1}],L:[{p:[56,59.8],b:-1},{p:[58,59.8],b:-1}]},{h:[39,47.5],t:356,A:[{p:[32,39.8],b:1},{p:[31,39.8],b:1}],L:[{p:[56,59.8],b:-1},{p:[58,59.8],b:-1}]},'chair'],
 ['Скручивания','Пресс','3×15–20','Поясница прижата к полу, подбородок не тянем к груди. Поднимайте лопатки.',BACK,M(BACK,{t:300,hd:15,A:[[72,80],[74,82]]})],
-['Подъём ног лёжа','Пресс','3×12–15','Поясница не отрывается от пола. Поднимайте прямые ноги до 90° и медленно опускайте.',{h:[50,57.4],t:270,A:[[92,90],[94,91]],L:[[91,90],[90,90]],f:[0,0]},{h:[50,57.4],t:270,A:[[92,90],[94,91]],L:[[12,10],[9,8]],f:[0,0]}],
+['Подъём ног лёжа','Пресс','3×12–15','Поясница не отрывается от пола. Поднимайте прямые ноги до 90° и медленно опускайте.',{h:[50,56],t:270,A:[[92,90],[94,91]],L:[[91,90],[90,90]],f:[0,0]},{h:[50,56],t:270,A:[[92,90],[94,91]],L:[[12,10],[9,8]],f:[0,0]}],
 ['Планка','Пресс','3×30–60 сек','Тело — прямая линия, живот и ягодицы напряжены. Не прогибайте поясницу.',PL,M(PL,{h:[45.8,52.1],t:76.5})],
 ['Приседания','Ноги','4×15–20','Колени смотрят в стороны носков, спина ровная, таз назад, пятки на полу.',STD,M(STD,{h:[40,46],t:42,hd:-30,A:[[92,90],[90,88]]})],
 ['Выпады','Ноги','3×10 на ногу','Шаг вперёд, переднее колено над стопой. Опускайтесь вертикально вниз.',{h:[51,34.5],t:0,A:[[178,176],[182,180]],L:[{p:[64,59.8],b:-1},{p:[38,58.5],b:-1}]},{h:[51,44.5],t:0,A:[[178,176],[182,180]],L:[{p:[64,59.8],b:-1},{p:[38,58.5],b:-1}]}],
-['Ягодичный мостик','Ноги','3×15','Лопатки на полу, поднимайте таз до прямой линии плечи–колени, сжимайте ягодицы.',M(BACK,{h:[50,57.4],L:[{p:[68,59.6],b:-1},{p:[70,59.6],b:-1}]}),M(BACK,{h:[50,45.5],t:230,hd:40,A:[[100,90],[102,92]],L:[{p:[68,59.6],b:-1},{p:[70,59.6],b:-1}]})],
+['Ягодичный мостик','Ноги','3×15','Лопатки на полу, поднимайте таз до прямой линии плечи–колени, сжимайте ягодицы.',M(BACK,{h:[50,56],L:[{p:[68,59.6],b:-1},{p:[70,59.6],b:-1}]}),M(BACK,{h:[50,45.5],t:230,hd:40,A:[[100,90],[102,92]],L:[{p:[68,59.6],b:-1},{p:[70,59.6],b:-1}]})],
 ['Подъём на носки','Ноги','4×20','Встаньте на носки как можно выше, задержитесь на секунду. Можно держаться за стену.',{h:[50,31.4],t:0,A:[[176,178],[184,182]],L:[[180,180],[182,181]]},{h:[50,27.6],t:0,A:[[176,178],[184,182]],L:[[180,180],[182,181]],f:[-38,-38]}],
 ['Прыжки «звёздочка»','Кардио','3×30 сек','Прыжком разведите ноги и поднимите руки. Отличный разогрев и сжигание калорий.',{fv:1,h:[50,31.5],t:0,A:[[176,178],[184,182]],L:[[179,180],[181,180]]},{fv:1,h:[50,28.5],t:0,A:[[38,20],[322,340]],L:[[162,165],[198,195]]}],
 ['Бег с высокими коленями','Кардио','3×30 сек','Бег на месте, колени до уровня таза, руки работают в такт.',{h:[50,30],t:4,A:[[205,115],[150,45]],L:[[95,185],[182,180]],f:[-90,-55]},{h:[50,30],t:4,A:[[150,45],[205,115]],L:[[182,180],[95,185]],f:[-55,-90]}],
-['Бёрпи','Кардио','3×8–10','Из упора лёжа прыжок к рукам и вверх. Самое «жиросжигающее» упражнение.',{h:[50,29.5],t:0,A:[[45,35],[35,25]],L:[[178,182],[182,184]],f:[-50,-50]},PU],
+['Бёрпи','Кардио','3×8–10','Из упора лёжа прыжок к рукам и вверх. Самое «жиросжигающее» упражнение.',{h:[50,30.5],t:0,A:[[62,48],[52,40]],L:[[178,182],[182,184]],f:[-50,-50]},PU],
 ['Скалолаз','Кардио','3×30 сек','Из упора лёжа поочерёдно подтягивайте колени к груди в быстром темпе.',M(MC,{L:[{p:[16,57.6],b:-1},{p:[37,54],b:-1}]}),M(MC,{L:[{p:[37,54],b:-1},{p:[16,57.6],b:-1}]})]
 ];
-X.forEach(function(x){x.c=[canon(x[4]),canon(x[5])]});
-var groups=['Все','Грудь','Спина','Плечи','Руки','Пресс','Ноги','Кардио'],grp='Все',frames=[];
+var MUS={chest:'грудь',delts:'плечи',biceps:'бицепс',triceps:'трицепс',forearm:'предплечья',abs:'пресс',obl:'косые мышцы',lats:'широчайшие',traps:'трапеции',lowback:'поясница',glutes:'ягодицы',quads:'квадрицепс',hams:'бицепс бедра',calves:'икры'};
+var WORK=[['chest','triceps','delts'],['triceps','chest'],['lowback','glutes','hams','traps'],['lats','biceps','traps'],['delts','triceps','traps'],['delts'],['biceps','forearm'],['triceps','delts'],['abs'],['abs','obl'],['abs','obl','delts'],['quads','glutes'],['quads','glutes','hams'],['glutes','hams'],['calves'],['delts','calves','quads'],['quads','abs','calves'],['quads','chest','triceps'],['abs','obl','delts']];
+X.forEach(function(x,i){x.c=[canon(x[4]),canon(x[5])];x[7]=WORK[i]});
+function musTxt(x){return '<div class="mus">'+x[7].map(function(m){return '<span>'+MUS[m]+'</span>'}).join('')+'</div>'}
+var groups=['Все','Грудь','Спина','Плечи','Руки','Пресс','Ноги','Кардио'],grp='Все';
 function renderEx(){
  $('chips').innerHTML=groups.map(function(g){return '<button class="chip'+(g===grp?' on':'')+'" data-g="'+g+'">'+g+'</button>'}).join('');
- frames=[];
- $('exs').innerHTML=X.filter(function(x){return grp==='Все'||x[1]===grp}).map(function(x,i){
-  frames.push(x);
-  return '<div class="card ex"><svg viewBox="0 0 100 70" data-i="'+(frames.length-1)+'">'+fig(x.c[0],x[6])+'</svg><div><b>'+x[0]+'</b><br><span class="tag">'+x[1]+'</span><span class="tag">'+x[2]+'</span><div class="mu">'+x[3]+'</div></div></div>'
- }).join('')+'<div class="card mu">Разминка 5 минут перед тренировкой, отдых между подходами 45–60 секунд. Для жиросжигания чередуйте силовые и кардио, для массы делайте медленнее и добавляйте вес (рюкзак с книгами).</div>';
+ var L=X.filter(function(x){return grp==='Все'||x[1]===grp});
+ $('exs').innerHTML=L.map(function(x){
+  return '<div class="card ex"><svg viewBox="0 0 100 70"></svg><div><b>'+x[0]+'</b><br><span class="tag">'+x[1]+'</span><span class="tag">'+x[2]+'</span>'+musTxt(x)+'<div class="mu">'+x[3]+'</div></div></div>'
+ }).join('')+'<div class="card mu">Нажмите на фигуру, чтобы рассмотреть крупно. Красным подсвечены мышцы, которые работают. Разминка 5 минут перед тренировкой, отдых между подходами 45–60 секунд.</div>';
+ $('exs').querySelectorAll('svg').forEach(function(s,i){build(s,L[i]);pose(s,L[i].c[0],0)});
 }
-/* плавная анимация: туда — пауза — обратно — пауза */
+$('exs').addEventListener('click',function(e){var s=e.target.closest('svg');if(!s)return;var x=s._x;
+ build($('bigsv'),x);pose($('bigsv'),x.c[0],0);$('bigt').textContent=x[0];$('bigm').innerHTML=musTxt(x);$('bigd').textContent=x[3];$('big').hidden=false});
+$('big').addEventListener('click',function(e){if(e.target.id==='big'||e.target.id==='bigx')$('big').hidden=true});
+/* плавная анимация: туда — пауза — обратно — пауза; рисуем только видимые фигуры */
 var lastT=0;
 function anim(ts){
  requestAnimationFrame(anim);
  if(ts-lastT<33||!$('s-train').classList.contains('on'))return;lastT=ts;
  var c=ts%2400/2400,u=c<.375?c/.375:c<.5?1:c<.875?1-(c-.5)/.375:0;u=(1-Math.cos(u*Math.PI))/2;
- document.querySelectorAll('#exs svg').forEach(function(s){var x=frames[+s.getAttribute('data-i')];if(x)s.innerHTML=fig(mix(x.c[0],x.c[1],u),x[6])});
+ var vh=innerHeight,list=$('big').hidden?$('exs').querySelectorAll('svg'):[$('bigsv')];
+ [].forEach.call(list,function(s){var r=s.getBoundingClientRect();if(s._x&&r.bottom>0&&r.top<vh)pose(s,mix(s._x.c[0],s._x.c[1],u),u)});
 }
 requestAnimationFrame(anim);
 
