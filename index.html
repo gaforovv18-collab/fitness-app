@@ -628,7 +628,7 @@ document.addEventListener('click',function(e){var b=e.target.closest('[data-go]'
 /* автоматический пересчёт при вводе; явные опечатки (рост 17, вес 7000) не применяем */
 var LIM={h:[120,230],w:[30,250],age:[12,90],sl:[4,12],dur:[10,180]};
 /* ===== хранилище и мелочи ===== */
-var VER='2.0.0',REPO='https://github.com/gaforovv18-collab/fitness-app';
+var VER='2.1.0',REPO='https://github.com/gaforovv18-collab/fitness-app';
 function ld(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
 function sv(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 function iso(d){d=d||new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
@@ -905,7 +905,7 @@ $('bug').onclick=function(){
 $('ver').textContent='Версия '+VER+' · данные хранятся только на этом устройстве';
 
 /* ===== напоминания при закрытом приложении (Web Push через сервер) ===== */
-var PUSH_URL='PUSH_URL_PLACEHOLDER',VAPID='BIdpUEcDr-_PU9WjcQHGujHxnDOviJG2MxrVdiL6PumRPkekFzDyUwwh7flQp7scYy-PEHa3EER_r2wf1kjKK0A';
+var PUSH_URL='https://fit-push.fitness-makedon.workers.dev',VAPID='BIdpUEcDr-_PU9WjcQHGujHxnDOviJG2MxrVdiL6PumRPkekFzDyUwwh7flQp7scYy-PEHa3EER_r2wf1kjKK0A';
 var PID=ld('fit_pid','');if(!PID){PID=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():Date.now()+'-'+String(Math.random()).slice(2);sv('fit_pid',PID)}
 var PUSHON=!!ld('fit_psh',''),pushErr='',pushT;
 function ub64(s){s=s.replace(/-/g,'+').replace(/_/g,'/');s+='='.repeat((4-s.length%4)%4);var b=atob(s),o=new Uint8Array(b.length);for(var i=0;i<b.length;i++)o[i]=b.charCodeAt(i);return o}
