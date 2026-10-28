@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#16a34a"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><title>Мой фитнес-помощник</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--tx:#1b1f24;--mu:#66707c;--ac:#16a34a;--ac2:#e8f7ee;--bd:#e3e6ea;--wa:#0ea5e9;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101316;--card:#1a1f24;--tx:#eceff2;--mu:#98a2ad;--ac:#34d399;--ac2:#14352a;--bd:#2a3138;--wa:#38bdf8}}
+:root[data-theme="dark"]{--bg:#101316;--card:#1a1f24;--tx:#eceff2;--mu:#98a2ad;--ac:#34d399;--ac2:#14352a;--bd:#2a3138;--wa:#38bdf8}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:720px;margin:0 auto;padding:14px 14px 90px}
+h1{font-size:20px;margin:6px 0 12px}h2{font-size:17px;margin:0 0 8px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:12px}
+nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--bd);display:flex;padding-bottom:env(safe-area-inset-bottom,0px);z-index:5}
+nav button{flex:1;border:0;background:none;color:var(--mu);padding:9px 2px;font-size:11px;cursor:pointer}
+nav button b{display:block;font-size:20px;font-weight:400}nav button.on{color:var(--ac);font-weight:600}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label{font-size:13px;color:var(--mu);display:block}
+input,select{width:100%;padding:9px;border:1px solid var(--bd);border-radius:9px;background:var(--bg);color:var(--tx);font-size:16px}
+.big{font-size:28px;font-weight:700;color:var(--ac)}.mu{color:var(--mu);font-size:13px}
+.btn{background:var(--ac);color:#04200f;border:0;border-radius:10px;padding:10px 14px;font-weight:600;cursor:pointer;font-size:15px}
+.chips{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;padding-bottom:4px}
+.chip{border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:20px;padding:6px 12px;white-space:nowrap;cursor:pointer;font-size:14px}
+.chip.on{background:var(--ac);color:#04200f;border-color:var(--ac)}
+.ex{display:flex;gap:12px;align-items:center}.ex svg{flex:0 0 130px;width:130px;height:91px;background:var(--ac2);border-radius:10px}
+.tag{display:inline-block;background:var(--ac2);color:var(--ac);border-radius:6px;padding:1px 7px;font-size:12px;margin-right:4px}
+ul{margin:4px 0;padding-left:20px}li{margin:2px 0}
+.bar{height:14px;background:var(--bd);border-radius:8px;overflow:hidden;margin:8px 0}.bar i{display:block;height:100%;background:var(--wa);width:0;transition:width .3s}
+#toast{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:12px;right:12px;max-width:600px;margin:auto;background:var(--ac);color:#04200f;padding:12px 14px;border-radius:12px;font-weight:600;display:none;z-index:9}
+.sec{display:none}.sec.on{display:block}
+.row{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--bd)}.row:last-child{border:0}
+</style></head><body>
+<div id="toast"></div>
+<main>
+<h1>💪 Мой фитнес-помощник</h1>
+
+<section class="sec on" id="s-set">
+ <div class="card"><h2>Мои параметры</h2>
+  <div class="g">
+   <div><label>Рост, см</label><input id="h" type="number" inputmode="numeric"></div>
+   <div><label>Вес, кг</label><input id="w" type="number" inputmode="decimal"></div>
+   <div><label>Возраст</label><input id="age" type="number" inputmode="numeric"></div>
+   <div><label>Пол</label><select id="sex"><option value="m">Мужской</option><option value="f">Женский</option></select></div>
+   <div><label>Цель</label><select id="goal"><option value="cut">Сжечь жир</option><option value="gain">Набрать мышцы</option></select></div>
+   <div><label>Сон, часов</label><input id="sl" type="number" step="0.5" inputmode="decimal"></div>
+   <div><label>Подъём в</label><input id="wake" type="time"></div>
+   <div><label>Время тренировки</label><input id="tr" type="time"></div>
+   <div><label>Длительность, мин</label><input id="dur" type="number" inputmode="numeric"></div>
+   <div><label>Напоминать про воду</label><select id="wr"><option value="1">Да, каждые 2 часа</option><option value="0">Нет</option></select></div>
+  </div>
+  <p><button class="btn" id="save">Сохранить и включить уведомления</button></p>
+  <p class="mu" id="perm"></p>
+ </div>
+ <div class="card"><h2>Мои показатели</h2><div id="stats"></div></div>
+</section>
+
+<section class="sec" id="s-sleep">
+ <div class="card"><h2>😴 Сон</h2><div id="sleepBox"></div></div>
+ <div class="card"><h2>Ближайшие напоминания</h2><div id="sched"></div></div>
+</section>
+
+<section class="sec" id="s-train">
+ <div class="chips" id="chips"></div>
+ <div id="exs"></div>
+</section>
+
+<section class="sec" id="s-food">
+ <div class="card"><h2 id="foodT"></h2><div id="foodBox"></div></div>
+</section>
+
+<section class="sec" id="s-water">
+ <div class="card"><h2>💧 Вода сегодня</h2>
+  <div class="big" id="wNeed"></div><div class="mu" id="wSub"></div>
+  <div class="bar"><i id="wBar"></i></div>
+  <div id="wDone" style="margin-bottom:8px"></div>
+  <button class="btn" id="add">+ стакан (250 мл)</button>
+  <button class="chip" id="undo">отменить</button>
+ </div>
+ <div class="card mu">Норма: примерно 33 мл на 1 кг веса плюс 0,6 л на каждый час тренировки. В жару пейте чуть больше.</div>
+</section>
+</main>
+
+<nav id="nav">
+ <button data-t="set" class="on"><b>⚙️</b>Параметры</button>
+ <button data-t="sleep"><b>😴</b>Сон</button>
+ <button data-t="train"><b>🏋️</b>Тренировки</button>
+ <button data-t="food"><b>🥗</b>Питание</button>
+ <button data-t="water"><b>💧</b>Вода</button>
+</nav>
+
+<script>
+var $=function(i){return document.getElementById(i)};
+var DEF={h:175,w:75,age:25,sex:'m',goal:'cut',sl:8,wake:'07:00',tr:'18:00',dur:45,wr:'1'};
+var S=Object.assign({},DEF);
+try{var r=localStorage.getItem('fit_s');if(r)S=Object.assign(S,JSON.parse(r))}catch(e){}
+var ids=['h','w','age','sex','goal','sl','wake','tr','dur','wr'];
+function fill(){ids.forEach(function(k){$(k).value=S[k]})}
+function pad(n){return (n<10?'0':'')+n}
+function toMin(t){var p=t.split(':');return +p[0]*60+ +p[1]}
+function fromMin(m){m=((m%1440)+1440)%1440;return pad(Math.floor(m/60))+':'+pad(m%60)}
+function fmt(x){return String(Math.round(x*10)/10).replace('.',',')}
+
+/* расчёты */
+function calc(){
+ var w=+S.w,h=+S.h,a=+S.age,m=S.sex==='m';
+ var bmi=w/Math.pow(h/100,2);
+ var bmr=10*w+6.25*h-5*a+(m?5:-161);
+ var tdee=bmr*1.5;
+ var kc=S.goal==='cut'?tdee-450:tdee+300;
+ var pr=w*(S.goal==='cut'?2:1.8);
+ var water=w*0.033+(+S.dur/60)*0.6;
+ return{bmi:bmi,kc:kc,pr:pr,water:water,fat:w*0.9}
+}
+function bmiTxt(b){return b<18.5?'ниже нормы':b<25?'норма':b<30?'выше нормы':'ожирение'}
+function renderStats(){
+ var c=calc();
+ $('stats').innerHTML=
+ '<div class="row"><span>Индекс массы тела</span><b>'+fmt(c.bmi)+' ('+bmiTxt(c.bmi)+')</b></div>'+
+ '<div class="row"><span>Калории в день</span><b>≈ '+Math.round(c.kc/10)*10+' ккал</b></div>'+
+ '<div class="row"><span>Белок в день</span><b>≈ '+Math.round(c.pr)+' г</b></div>'+
+ '<div class="row"><span>Вода в день</span><b>≈ '+fmt(c.water)+' л</b></div>'+
+ '<div class="row"><span>Сон</span><b>'+fmt(+S.sl)+' ч</b></div>'+
+ '<p class="mu">Это ориентиры, а не медицинские назначения. При болезнях проконсультируйтесь с врачом.</p>';
+}
+
+/* сон */
+function renderSleep(){
+ var wake=toMin(S.wake),bed=wake-Math.round(+S.sl*60);
+ var cyc=Math.round(+S.sl*60/90*10)/10;
+ $('sleepBox').innerHTML=
+ '<div class="big">Ложитесь в '+fromMin(bed)+'</div>'+
+ '<div class="mu">Подъём в '+S.wake+' · сон '+fmt(+S.sl)+' ч (≈ '+fmt(cyc)+' циклов по 90 мин)</div>'+
+ '<ul><li>Взрослым нужно 7–9 часов, при активных тренировках лучше 8–9: мышцы растут и жир уходит именно во сне.</li>'+
+ '<li>Напоминание придёт за 30 минут до сна: уберите телефон, приглушите свет.</li>'+
+ '<li>Последний приём пищи за 2–3 часа до сна, кофеин — до 15:00.</li>'+
+ '<li>Ложитесь и вставайте в одно время, даже в выходные.</li></ul>';
+ var ev=events().sort(function(a,b){return a.m-b.m});
+ var now=new Date(),nm=now.getHours()*60+now.getMinutes();
+ $('sched').innerHTML=ev.map(function(e){return '<div class="row"><span>'+e.ic+' '+e.t+'</span><b>'+fromMin(e.m)+'</b></div>'}).join('')+
+ '<p class="mu">Уведомления приходят, пока приложение открыто во вкладке или в фоне браузера. Для надёжности добавьте страницу на главный экран.</p>';
+}
+function events(){
+ var wake=toMin(S.wake),bed=wake-Math.round(+S.sl*60),tr=toMin(S.tr),L=[];
+ L.push({id:'b30',m:(bed-30+1440)%1440,ic:'🌙',t:'Скоро спать',b:'Через 30 минут пора ложиться: уберите телефон.'});
+ L.push({id:'bed',m:(bed+1440)%1440,ic:'😴',t:'Пора спать',b:'Ложитесь. Нужно поспать '+fmt(+S.sl)+' ч, подъём в '+S.wake+'.'});
+ L.push({id:'wk',m:wake,ic:'☀️',t:'Доброе утро',b:'Выпейте стакан воды и сделайте зарядку.'});
+ L.push({id:'tr15',m:(tr-15+1440)%1440,ic:'🏋️',t:'Скоро тренировка',b:'Через 15 минут тренировка: переоденьтесь, выпейте воды.'});
+ L.push({id:'tr',m:tr,ic:'🔥',t:'Время тренировки',b:'Начинаем! Откройте раздел «Тренировки».'});
+ if(S.wr==='1'){for(var m=wake+120,i=1;m<bed-120+(bed<wake?1440:0)&&i<8;m+=120,i++)L.push({id:'w'+i,m:m%1440,ic:'💧',t:'Выпейте воды',b:'Выпейте стакан воды. Норма сегодня ≈ '+fmt(calc().water)+' л.'})}
+ return L;
+}
+var fired={};try{fired=JSON.parse(localStorage.getItem('fit_f')||'{}')}catch(e){}
+function check(){
+ var n=new Date(),k=n.getHours()*60+n.getMinutes(),d=n.toDateString();
+ events().forEach(function(e){
+  var key=d+e.id;
+  if(e.m===k&&!fired[key]){fired={};fired[key]=1;try{localStorage.setItem('fit_f',JSON.stringify(fired))}catch(x){}notify(e.ic+' '+e.t,e.b)}
+ });
+}
+function beep(){try{var c=new (window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=880;g.gain.value=.15;o.start();setTimeout(function(){o.stop();c.close()},400)}catch(e){}}
+function notify(t,b){
+ var el=$('toast');el.textContent=t+' — '+b;el.style.display='block';setTimeout(function(){el.style.display='none'},9000);
+ try{if(window.Notification&&Notification.permission==='granted')new Notification(t,{body:b})}catch(e){}
+ try{if(navigator.vibrate)navigator.vibrate([200,100,200])}catch(e){}
+ beep();
+}
+function permTxt(){var p='';try{p=window.Notification?Notification.permission:'none'}catch(e){p='none'}
+ $('perm').textContent=p==='granted'?'Системные уведомления включены.':p==='denied'?'Уведомления заблокированы в браузере: напоминания будут показываться внутри приложения со звуком.':'Нажмите «Сохранить», чтобы разрешить уведомления.'}
+
+/* тренировки */
+function P(a){return a}
+var X=[
+['Отжимания','Грудь','3×10–15','Руки чуть шире плеч, корпус прямой, опускайтесь до угла 90° в локтях. Тяжело — отжимайтесь с колен.',P([70,34,62,38,40,46,25,52,10,58,63,48,64,58]),P([70,50,62,52,42,54,26,56,10,58,54,56,64,58])],
+['Алмазные отжимания','Грудь','3×8–12','Ладони вместе под грудью, локти вдоль корпуса. Работают грудь и трицепс.',P([70,34,62,38,40,46,25,52,10,58,63,48,64,58]),P([70,50,62,52,42,54,26,56,10,58,54,56,64,58])],
+['Лодочка (супермен)','Спина','3×12','Лёжа на животе одновременно поднимите руки и ноги, задержитесь на 2 секунды.',P([88,54,78,54,45,54,30,54,12,54,86,54,95,54]),P([86,46,78,48,45,54,30,48,12,44,88,42,96,38])],
+['Тяга рюкзака в наклоне','Спина','3×12','Наклон корпуса вперёд, спина ровная. Тяните рюкзак с книгами к поясу, сводя лопатки.',P([66,20,60,24,40,34,40,48,40,60,62,40,62,50]),P([66,20,60,24,40,34,40,48,40,60,50,32,58,34])],
+['Отжимания «горка»','Плечи','3×8–10','Таз высоко, тело домиком. Опускайте макушку к полу, сгибая локти.',P([62,46,56,40,38,22,24,40,10,58,60,50,66,58]),P([66,52,58,50,38,22,24,40,10,58,50,52,66,58])],
+['Подъём рук с бутылками','Плечи','3×15','В руках бутылки с водой. Поднимайте прямые руки до уровня плеч, без раскачки.',P([50,8,50,14,50,36,50,48,50,60,52,28,52,40]),P([50,8,50,14,50,36,50,48,50,60,58,22,66,20])],
+['Сгибание рук с рюкзаком','Руки','3×12','Локти прижаты к корпусу. Поднимайте рюкзак к плечу, медленно опускайте.',P([50,8,50,14,50,36,50,48,50,60,52,28,52,40]),P([50,8,50,14,50,36,50,48,50,60,52,28,60,20])],
+['Отжимания от стула','Руки','3×10–15','Руки на краю стула за спиной. Опускайтесь до угла 90° в локтях. Прорабатывает трицепс.',P([40,13,40,19,34,40,56,40,62,60,38,30,36,40]),P([40,24,40,30,34,48,56,46,62,60,28,40,34,44])],
+['Скручивания','Пресс','3×15–20','Поясница прижата к полу, подбородок не тянем к груди. Поднимайте лопатки.',P([10,54,18,54,46,54,60,40,70,56,24,50,14,46]),P([22,38,30,42,46,54,60,40,70,56,40,34,30,30])],
+['Подъём ног лёжа','Пресс','3×12–15','Поясница не отрывается от пола. Поднимайте прямые ноги до 90° и медленно опускайте.',P([8,54,15,54,40,54,55,54,70,54,25,56,35,56]),P([8,54,15,54,40,54,40,38,40,22,25,56,35,56])],
+['Планка','Пресс','3×30–60 сек','Тело — прямая линия, живот и ягодицы напряжены. Не прогибайте поясницу.',P([70,44,62,46,40,50,25,54,10,58,62,58,72,58]),P([70,44,62,46,40,47,25,53,10,58,62,58,72,58])],
+['Приседания','Ноги','4×15–20','Колени смотрят в стороны носков, спина ровная, таз назад, пятки на полу.',P([50,8,50,14,50,36,50,48,50,60,56,20,64,20]),P([42,18,42,24,32,42,52,42,46,60,52,24,60,24])],
+['Выпады','Ноги','3×10 на ногу','Шаг вперёд, переднее колено над стопой. Опускайтесь вертикально вниз.',P([50,8,50,14,50,36,50,48,50,60,56,28,56,38]),P([50,18,50,24,46,42,64,42,64,60,54,34,58,40])],
+['Ягодичный мостик','Ноги','3×15','Лопатки на полу, поднимайте таз до прямой линии плечи–колени, сжимайте ягодицы.',P([8,56,15,56,40,56,55,40,60,56,24,58,34,58]),P([8,56,15,56,40,42,55,40,60,56,24,58,34,58])],
+['Подъём на носки','Ноги','4×20','Встаньте на носки как можно выше, задержитесь на секунду. Можно держаться за стену.',P([50,8,50,14,50,36,50,48,50,60,52,28,52,40]),P([50,4,50,10,50,32,50,44,50,56,52,24,52,36])],
+['Прыжки «звёздочка»','Кардио','3×30 сек','Прыжком разведите ноги и поднимите руки. Отличный разогрев и сжигание калорий.',P([50,8,50,14,50,36,50,48,50,60,52,28,52,40]),P([50,8,50,14,50,36,58,48,64,60,58,10,62,2])],
+['Бег с высокими коленями','Кардио','3×30 сек','Бег на месте, колени до уровня таза, руки работают в такт.',P([50,8,50,14,50,36,50,48,50,60,52,28,52,40]),P([50,8,50,14,50,36,64,32,60,46,56,24,62,30])],
+['Бёрпи','Кардио','3×8–10','Из упора лёжа прыжок к рукам и вверх. Самое «жиросжигающее» упражнение.',P([50,6,50,12,50,34,50,46,50,60,56,6,58,0]),P([70,34,62,38,40,46,25,52,10,58,63,48,64,58])],
+['Скалолаз','Кардио','3×30 сек','Из упора лёжа поочерёдно подтягивайте колени к груди в быстром темпе.',P([70,44,62,46,40,50,25,54,10,58,62,58,72,58]),P([70,44,62,46,40,48,56,50,50,58,62,58,72,58])]
+];
+var groups=['Все','Грудь','Спина','Плечи','Руки','Пресс','Ноги','Кардио'],grp='Все',frames=[];
+function fig(f){
+ var h=f.slice(0,2),n=f.slice(2,4),p=f.slice(4,6),k=f.slice(6,8),a=f.slice(8,10),e=f.slice(10,12),w=f.slice(12,14);
+ function L(u,v){return '<line x1="'+u[0]+'" y1="'+u[1]+'" x2="'+v[0]+'" y2="'+v[1]+'"/>'}
+ return '<line x1="2" y1="61" x2="98" y2="61" stroke="var(--bd)" stroke-width="1.5"/><g stroke="var(--ac)" stroke-width="3.2" stroke-linecap="round" fill="none">'+L(n,p)+L(p,k)+L(k,a)+L(n,e)+L(e,w)+'<circle cx="'+h[0]+'" cy="'+h[1]+'" r="4.5" fill="var(--ac)"/></g>'
+}
+function renderEx(){
+ $('chips').innerHTML=groups.map(function(g){return '<button class="chip'+(g===grp?' on':'')+'" data-g="'+g+'">'+g+'</button>'}).join('');
+ frames=[];
+ $('exs').innerHTML=X.filter(function(x){return grp==='Все'||x[1]===grp}).map(function(x,i){
+  frames.push(x);
+  return '<div class="card ex"><svg viewBox="0 0 100 70" data-i="'+(frames.length-1)+'">'+fig(x[4])+'</svg><div><b>'+x[0]+'</b><br><span class="tag">'+x[1]+'</span><span class="tag">'+x[2]+'</span><div class="mu">'+x[3]+'</div></div></div>'
+ }).join('')+'<div class="card mu">Разминка 5 минут перед тренировкой, отдых между подходами 45–60 секунд. Для жиросжигания чередуйте силовые и кардио, для массы делайте медленнее и добавляйте вес (рюкзак с книгами).</div>';
+}
+var tick=0;setInterval(function(){tick^=1;document.querySelectorAll('#exs svg').forEach(function(s){var x=frames[+s.getAttribute('data-i')];if(x)s.innerHTML=fig(x[4+tick])})},800);
+
+/* питание */
+var FOOD={
+cut:{t:'🔥 Питание для сжигания жира',
+ p:['Куриная грудка, индейка','Яйца (белок + 1 желток)','Нежирный творог, греческий йогурт','Белая рыба: треска, хек, судак','Тунец, кальмары, креветки'],
+ c:['Овсянка на воде','Гречка','Бурый рис, булгур','Чечевица, нут, фасоль','Цельнозерновой хлеб (немного)'],
+ v:['Огурцы, помидоры, капуста','Брокколи, цветная капуста','Шпинат, зелень, сельдерей','Грейпфрут, яблоки, ягоды'],
+ d:['Овсянка с ягодами и творогом на завтрак','Куриная грудка на гриле с овощами и гречкой','Запечённая рыба с брокколи','Омлет из 3 белков со шпинатом','Суп-пюре из чечевицы','Салат из тунца с огурцами и яйцом'],
+ t:'Дефицит калорий небольшой (−400–500 ккал), белок высокий, сахар и сладкие напитки сведены к минимуму. Зелёный чай и вода хорошо помогают контролировать аппетит. Жир «точечно» не сжигается: он уходит равномерно.'},
+gain:{t:'💪 Питание для набора мышц',
+ p:['Говядина, постная баранина','Куриные бёдра и грудка','Яйца целиком (3–4 в день)','Творог, кефир, молоко','Рыба: лосось, скумбрия, сардины'],
+ c:['Рис, гречка, макароны из твёрдых сортов','Картофель, батат','Овсянка на молоке','Бананы, финики, сухофрукты','Цельнозерновой хлеб'],
+ v:['Овощи к каждому приёму пищи','Авокадо, орехи (миндаль, грецкий)','Арахисовая паста','Оливковое масло (1–2 ложки)'],
+ d:['Овсянка с бананом, орехами и молоком','Рис с курицей и овощами','Гречка с говядиной','Омлет из 4 яиц с сыром и хлебом','Творог с мёдом и орехами','Картофельное пюре с рыбой','Протеиновый смузи: молоко, банан, овсянка'],
+ t:'Профицит небольшой (+250–300 ккал), белок около 1,8 г на кг веса. Ешьте 4–5 раз в день, углеводы — вокруг тренировки. Растёт мышца только если есть нагрузка и хороший сон.'}};
+function li(a){return '<ul>'+a.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul>'}
+function renderFood(){
+ var f=FOOD[S.goal],c=calc();
+ $('foodT').textContent=f.t;
+ $('foodBox').innerHTML='<p><span class="tag">≈ '+Math.round(c.kc/10)*10+' ккал</span><span class="tag">белок ≈ '+Math.round(c.pr)+' г</span></p>'+
+ '<b>Белки</b>'+li(f.p)+'<b>Углеводы</b>'+li(f.c)+'<b>Овощи, фрукты, жиры</b>'+li(f.v)+'<b>Блюда</b>'+li(f.d)+'<p class="mu">'+f.t+'</p>'+
+ '<p class="mu">Цель можно сменить во вкладке «Параметры».</p>';
+}
+
+/* вода */
+var today=new Date().toDateString(),cups=0;
+try{var wd=JSON.parse(localStorage.getItem('fit_w')||'{}');if(wd.d===today)cups=wd.c}catch(e){}
+function saveCups(){try{localStorage.setItem('fit_w',JSON.stringify({d:today,c:cups}))}catch(e){}}
+function renderWater(){
+ var need=calc().water,got=cups*0.25,n=Math.ceil(need/0.25);
+ $('wNeed').textContent=fmt(need)+' л в день';
+ $('wSub').textContent='Это около '+n+' стаканов по 250 мл. Выпито: '+fmt(got)+' л';
+ $('wBar').style.width=Math.min(100,got/need*100)+'%';
+ $('wDone').textContent=cups?'💧'.repeat(Math.min(cups,24)):'Пока ни одного стакана';
+}
+$('add').onclick=function(){cups++;saveCups();renderWater()};
+$('undo').onclick=function(){if(cups>0)cups--;saveCups();renderWater()};
+
+/* общее */
+function renderAll(){renderStats();renderSleep();renderFood();renderWater();renderEx()}
+$('save').onclick=function(){
+ ids.forEach(function(k){S[k]=$(k).value||DEF[k]});
+ try{localStorage.setItem('fit_s',JSON.stringify(S))}catch(e){}
+ try{if(window.Notification&&Notification.permission==='default')Notification.requestPermission().then(permTxt)}catch(e){}
+ renderAll();permTxt();notify('✅ Сохранено','Уведомления настроены: сон, тренировка, вода.');
+};
+$('chips').onclick=function(e){var g=e.target.getAttribute('data-g');if(g){grp=g;renderEx()}};
+$('nav').onclick=function(e){var b=e.target.closest('button');if(!b)return;var t=b.getAttribute('data-t');
+ document.querySelectorAll('nav button').forEach(function(x){x.classList.toggle('on',x===b)});
+ document.querySelectorAll('.sec').forEach(function(s){s.classList.toggle('on',s.id==='s-'+t)});window.scrollTo(0,0)};
+fill();renderAll();permTxt();check();setInterval(check,15000);
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
+</script></body></html>
