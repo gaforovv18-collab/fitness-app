@@ -37,6 +37,11 @@ ul{margin:4px 0;padding-left:20px}li{margin:2px 0}
 #toast{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:12px;right:12px;max-width:600px;margin:auto;background:var(--ac);color:var(--on);padding:12px 14px;border-radius:12px;font-weight:600;display:none;z-index:9}
 .sec{display:none}.sec.on{display:block}
 .row{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--bd)}.row:last-child{border:0}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.btn2{background:none;color:var(--ac);border:1px solid var(--ac);border-radius:10px;padding:9px 12px;font-weight:600;cursor:pointer;font-size:14px}
+.warn{border-left:3px solid var(--ac);padding:6px 10px;margin:8px 0;background:var(--ac2);border-radius:6px;font-size:14px}
+.day{border-top:1px solid var(--bd);padding:10px 0}.day:first-of-type{border:0}.day h3{font-size:15px;margin:0 0 6px;display:flex;justify-content:space-between;gap:8px}.day h3 i{font-style:normal;color:var(--mu);font-weight:400;font-size:13px}
+.today{color:var(--ac)}.exr{display:flex;justify-content:space-between;gap:8px;padding:3px 0;font-size:14px}.exb{background:none;border:0;padding:0;color:var(--ac);font-size:14px;text-align:left;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.meal{border-top:1px solid var(--bd);padding:8px 0}.meal:first-of-type{border:0}.meal .exr span:last-child{color:var(--mu)}
 </style></head><body>
 <div id="toast"></div>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><radialGradient id="gsh" cx=".38" cy=".3" r=".8"><stop offset="0" stop-color="#fff" stop-opacity=".5"/><stop offset=".35" stop-color="#fff" stop-opacity=".08"/><stop offset=".7" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".38"/></radialGradient></defs></svg>
@@ -57,10 +62,15 @@ ul{margin:4px 0;padding-left:20px}li{margin:2px 0}
    <div><label>Время тренировки</label><input id="tr" type="time"></div>
    <div><label>Длительность, мин</label><input id="dur" type="number" inputmode="numeric"></div>
    <div><label>Напоминать про воду</label><select id="wr"><option value="1">Каждые 2 ч</option><option value="0">Нет</option></select></div>
+   <div><label>Активность днём</label><select id="act"><option value="1.2">Сидячая работа</option><option value="1.375">Немного хожу</option><option value="1.55">Много движения</option><option value="1.725">Физический труд</option></select></div>
+   <div><label>Уровень подготовки</label><select id="lvl"><option value="beg">Новичок</option><option value="mid">Средний</option><option value="adv">Опытный</option></select></div>
+   <div><label>Тренировок в неделю</label><select id="days"><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></div>
   </div>
   <p><button class="btn" id="save">Сохранить и включить уведомления</button></p>
   <p class="mu" id="perm"></p>
+  <p class="mu">План ниже пересчитывается сразу, как только вы меняете любое поле.</p>
  </div>
+ <div class="card"><h2>Мой план</h2><div id="stats"></div></div>
  <div class="card"><h2>Мелодии уведомлений</h2>
   <div class="g g1">
    <div><label>Сон</label><div class="rt"><select id="rs"></select><button class="play" data-r="rs" aria-label="Прослушать"><svg viewBox="0 0 14 14"><path d="M3 1.5v11l9.5-5.5z"/></svg></button></div></div>
@@ -70,7 +80,6 @@ ul{margin:4px 0;padding-left:20px}li{margin:2px 0}
   </div>
   <p class="mu">Мелодия звучит, пока приложение открыто или свёрнуто. Системные уведомления телефона приходят со стандартным звуком: браузер не даёт сайтам менять его.</p>
  </div>
- <div class="card"><h2>Мои показатели</h2><div id="stats"></div></div>
 </section>
 
 <section class="sec" id="s-sleep">
@@ -79,11 +88,14 @@ ul{margin:4px 0;padding-left:20px}li{margin:2px 0}
 </section>
 
 <section class="sec" id="s-train">
+ <div id="prog"></div>
+ <h2 style="margin:16px 2px 8px">Все упражнения</h2>
  <div class="chips" id="chips"></div>
  <div id="exs"></div>
 </section>
 
 <section class="sec" id="s-food">
+ <div class="card" id="menu"></div>
  <div class="card"><h2 id="foodT"></h2><div id="foodBox"></div></div>
 </section>
 
@@ -109,10 +121,10 @@ ul{margin:4px 0;padding-left:20px}li{margin:2px 0}
 
 <script>
 var $=function(i){return document.getElementById(i)};
-var DEF={h:175,w:75,age:25,sex:'m',goal:'cut',sl:8,wake:'07:00',tr:'18:00',dur:45,wr:'1',rs:'soft',rw:'morning',rt:'power',rv:'drop'};
+var DEF={h:175,w:75,age:25,sex:'m',goal:'cut',sl:8,wake:'07:00',tr:'18:00',dur:45,wr:'1',act:'1.375',lvl:'beg',days:'3',rs:'soft',rw:'morning',rt:'power',rv:'drop'};
 var S=Object.assign({},DEF);
 try{var r=localStorage.getItem('fit_s');if(r)S=Object.assign(S,JSON.parse(r))}catch(e){}
-var ids=['h','w','age','sex','goal','sl','wake','tr','dur','wr','rs','rw','rt','rv'];
+var ids=['h','w','age','sex','goal','sl','wake','tr','dur','wr','rs','rw','rt','rv','act','lvl','days'];
 function fill(){ids.forEach(function(k){$(k).value=S[k]})}
 function pad(n){return (n<10?'0':'')+n}
 function toMin(t){var p=t.split(':');return +p[0]*60+ +p[1]}
@@ -121,27 +133,36 @@ function fmt(x){return String(Math.round(x*10)/10).replace('.',',')}
 
 /* расчёты */
 function calc(){
- var w=+S.w,h=+S.h,a=+S.age,m=S.sex==='m';
- var bmi=w/Math.pow(h/100,2);
- var bmr=10*w+6.25*h-5*a+(m?5:-161);
- var tdee=bmr*1.5;
- var kc=S.goal==='cut'?tdee-450:tdee+300;
- var pr=w*(S.goal==='cut'?2:1.8);
- var water=w*0.033+(+S.dur/60)*0.6;
- return{bmi:bmi,kc:kc,pr:pr,water:water,fat:w*0.9}
+ var w=+S.w,h=+S.h,a=+S.age,m=S.sex==='m',d=+S.days,cut=S.goal==='cut',hm=h/100;
+ var bmi=w/hm/hm,lo=18.5*hm*hm,hi=24.9*hm*hm;
+ var bmr=10*w+6.25*h-5*a+(m?5:-161),tdee=bmr*(+S.act+d*.025);
+ var kc=cut?Math.max(m?1500:1200,tdee-Math.min(600,Math.max(300,tdee*.18))):tdee+Math.min(350,tdee*.1);
+ var pw=cut&&w>hi?Math.max(hi,w*.85):w; /* при лишнем весе белок считаем от веса ближе к норме */
+ var pr=pw*(cut?2:1.8),fat=Math.max(w*.8,kc*.25/9),carb=Math.max(50,(kc-pr*4-fat*9)/4);
+ return{bmi:bmi,lo:lo,hi:hi,tdee:tdee,kc:kc,pr:pr,fat:fat,carb:carb,water:w*0.033+(+S.dur/60)*0.6,
+  wk:cut?(tdee-kc)*7/7700:0,soft:bmi>=30||a>=50}
 }
 function bmiTxt(b){return b<18.5?'ниже нормы':b<25?'норма':b<30?'выше нормы':'ожирение'}
+function r10(x){return Math.round(x/10)*10}
+function row(k,v){return '<div class="row"><span>'+k+'</span><b>'+v+'</b></div>'}
 function renderStats(){
- var c=calc();
- $('stats').innerHTML=
- '<div class="row"><span>Индекс массы тела</span><b>'+fmt(c.bmi)+' ('+bmiTxt(c.bmi)+')</b></div>'+
- '<div class="row"><span>Калории в день</span><b>≈ '+Math.round(c.kc/10)*10+' ккал</b></div>'+
- '<div class="row"><span>Белок в день</span><b>≈ '+Math.round(c.pr)+' г</b></div>'+
- '<div class="row"><span>Вода в день</span><b>≈ '+fmt(c.water)+' л</b></div>'+
- '<div class="row"><span>Сон</span><b>'+fmt(+S.sl)+' ч</b></div>'+
- '<p class="mu">Это ориентиры, а не медицинские назначения. При болезнях проконсультируйтесь с врачом.</p>';
+ var c=calc(),cut=S.goal==='cut',w=+S.w,warn='';
+ if(cut&&c.bmi<18.5)warn='Ваш вес ниже нормы, худеть не стоит. Лучше выберите цель «Набрать мышцы».';
+ else if(!cut&&c.bmi>=30)warn='При вашем весе сначала лучше снизить жир: выберите цель «Сжечь жир». Мышцы будут расти и на дефиците, если тренироваться.';
+ var fc=cut?(w>c.hi?'≈ −'+fmt(c.wk)+' кг в неделю, до '+Math.round(c.hi)+' кг примерно за '+Math.ceil((w-c.hi)/c.wk)+' нед.':'≈ −'+fmt(c.wk)+' кг в неделю'):(S.lvl==='beg'?'≈ +0,7–1 кг в месяц':'≈ +0,3–0,5 кг в месяц');
+ $('stats').innerHTML=(warn?'<div class="warn">'+warn+'</div>':'')+
+ row('Индекс массы тела',fmt(c.bmi)+' ('+bmiTxt(c.bmi)+')')+
+ row('Здоровый вес для вашего роста',Math.round(c.lo)+'–'+Math.round(c.hi)+' кг')+
+ row('Калории в день','≈ '+r10(c.kc)+' ккал')+
+ row('Белки · жиры · углеводы',Math.round(c.pr)+' · '+Math.round(c.fat)+' · '+Math.round(c.carb)+' г')+
+ row('Вода в день','≈ '+fmt(c.water)+' л')+
+ row('Сон',fmt(+S.sl)+' ч')+
+ row('Тренировки',S.days+(S.days<5?' раза':' раз')+' в неделю по '+S.dur+' мин')+
+ row('Шагов в день',cut?'8–10 тыс.':'6–8 тыс.')+
+ row('Прогноз',fc)+
+ '<div class="btns"><button class="btn" data-go="food">Мой рацион</button><button class="btn2" data-go="train">Моя программа</button></div>'+
+ '<p class="mu">Взвешивайтесь раз в неделю утром натощак. Если 2 недели вес стоит на месте, '+(cut?'уберите':'добавьте')+' 150 ккал в день. Это ориентиры, а не медицинские назначения: при болезнях посоветуйтесь с врачом.</p>';
 }
-
 /* сон */
 function renderSleep(){
  var wake=toMin(S.wake),bed=wake-Math.round(+S.sl*60);
@@ -395,8 +416,7 @@ function renderEx(){
  }).join('')+'<div class="card mu">Нажмите на фигуру, чтобы рассмотреть крупно. Красным подсвечены мышцы, которые работают. Разминка 5 минут перед тренировкой, отдых между подходами 45–60 секунд.</div>';
  $('exs').querySelectorAll('svg').forEach(function(s,i){build(s,L[i]);pose(s,L[i].c[0],0)});
 }
-$('exs').addEventListener('click',function(e){var s=e.target.closest('svg');if(!s)return;var x=s._x;
- build($('bigsv'),x);pose($('bigsv'),x.c[0],0);$('bigt').textContent=x[0];$('bigm').innerHTML=musTxt(x);$('bigd').textContent=x[3];$('big').hidden=false});
+$('exs').addEventListener('click',function(e){var s=e.target.closest('svg');if(s)openBig(s._x)});
 $('big').addEventListener('click',function(e){if(e.target.id==='big'||e.target.id==='bigx')$('big').hidden=true});
 /* плавная анимация: туда — пауза — обратно — пауза; рисуем только видимые фигуры */
 var lastT=0;
@@ -416,19 +436,32 @@ cut:{t:'Питание для сжигания жира',
  c:['Овсянка на воде','Гречка','Бурый рис, булгур','Чечевица, нут, фасоль','Цельнозерновой хлеб (немного)'],
  v:['Огурцы, помидоры, капуста','Брокколи, цветная капуста','Шпинат, зелень, сельдерей','Грейпфрут, яблоки, ягоды'],
  d:['Овсянка с ягодами и творогом на завтрак','Куриная грудка на гриле с овощами и гречкой','Запечённая рыба с брокколи','Омлет из 3 белков со шпинатом','Суп-пюре из чечевицы','Салат из тунца с огурцами и яйцом'],
- t:'Дефицит калорий небольшой (−400–500 ккал), белок высокий, сахар и сладкие напитки сведены к минимуму. Зелёный чай и вода хорошо помогают контролировать аппетит. Жир «точечно» не сжигается: он уходит равномерно.'},
+ n:'Дефицит калорий небольшой (−400–500 ккал), белок высокий, сахар и сладкие напитки сведены к минимуму. Зелёный чай и вода хорошо помогают контролировать аппетит. Жир «точечно» не сжигается: он уходит равномерно.'},
 gain:{t:'Питание для набора мышц',
  p:['Говядина, постная баранина','Куриные бёдра и грудка','Яйца целиком (3–4 в день)','Творог, кефир, молоко','Рыба: лосось, скумбрия, сардины'],
  c:['Рис, гречка, макароны из твёрдых сортов','Картофель, батат','Овсянка на молоке','Бананы, финики, сухофрукты','Цельнозерновой хлеб'],
  v:['Овощи к каждому приёму пищи','Авокадо, орехи (миндаль, грецкий)','Арахисовая паста','Оливковое масло (1–2 ложки)'],
  d:['Овсянка с бананом, орехами и молоком','Рис с курицей и овощами','Гречка с говядиной','Омлет из 4 яиц с сыром и хлебом','Творог с мёдом и орехами','Картофельное пюре с рыбой','Протеиновый смузи: молоко, банан, овсянка'],
- t:'Профицит небольшой (+250–300 ккал), белок около 1,8 г на кг веса. Ешьте 4–5 раз в день, углеводы — вокруг тренировки. Растёт мышца только если есть нагрузка и хороший сон.'}};
+ n:'Профицит небольшой (+250–300 ккал), белок около 1,8 г на кг веса. Ешьте 4–5 раз в день, углеводы — вокруг тренировки. Растёт мышца только если есть нагрузка и хороший сон.'}};
+var FD={oat:['Овсянка (сухая)',370,13,7,62],tv:['Творог 5%',121,17,5,2],ber:['Ягоды',45,1,0,10],chk:['Куриная грудка',165,31,4,0],buck:['Гречка варёная',110,4,1,21],veg:['Овощи',30,1.5,.2,5],oil:['Оливковое масло',900,0,100,0],yog:['Греческий йогурт',70,10,2,4],apl:['Яблоко',50,.3,0,12],fish:['Белая рыба',90,19,1,0],rice:['Рис варёный',130,2.7,.3,28],milk:['Молоко 2,5%',52,3,2.5,4.7],ban:['Банан',90,1,.3,21],nut:['Орехи',620,20,55,12],beef:['Говядина',220,26,12,0],hon:['Мёд',320,0,0,80],bread:['Хлеб цельнозерновой',250,9,3,45],sal:['Лосось',200,20,13,0],pot:['Картофель отварной',80,2,.1,17]};
+var MEALS={cut:[['Завтрак',.25,[['oat',60],['tv',100],['ber',100],['nut',10]]],['Обед',.35,[['chk',120],['buck',200],['veg',200],['oil',10]]],['Перекус',.15,[['yog',150],['apl',150],['nut',10]]],['Ужин',.25,[['fish',170],['rice',150],['veg',250],['oil',10]]]],
+ gain:[['Завтрак',.25,[['oat',80],['milk',250],['ban',120],['nut',20]]],['Обед',.35,[['beef',150],['rice',250],['veg',150],['oil',10]]],['Перекус',.15,[['tv',150],['hon',15],['bread',50],['ban',100]]],['Ужин',.25,[['sal',150],['pot',300],['veg',150]]]]};
+function renderMenu(){
+ var c=calc(),T=[0,0,0,0];
+ var h=MEALS[S.goal].map(function(ml){
+  var base=ml[2].reduce(function(t,i){return t+FD[i[0]][1]*i[1]/100},0),f=c.kc*ml[1]/base;
+  return '<div class="meal"><b>'+ml[0]+'</b> <span class="mu">≈ '+r10(c.kc*ml[1])+' ккал</span>'+ml[2].map(function(i){
+   var d=FD[i[0]],g=Math.max(5,Math.round(i[1]*f/5)*5);for(var k=0;k<4;k++)T[k]+=d[k+1]*g/100;
+   return '<div class="exr"><span>'+d[0]+'</span><span>'+g+' г</span></div>'}).join('')+'</div>'}).join('');
+ $('menu').innerHTML='<h2>Ваш рацион на день</h2><p><span class="tag">≈ '+r10(c.kc)+' ккал</span><span class="tag">Б '+Math.round(c.pr)+' г</span><span class="tag">Ж '+Math.round(c.fat)+' г</span><span class="tag">У '+Math.round(c.carb)+' г</span></p>'+h+
+  '<p class="mu">По этому меню: ≈ '+r10(T[0])+' ккал, белка '+Math.round(T[1])+' г. Продукты можно менять на похожие из списков ниже. Крупы и гарниры указаны в готовом виде, овсянка — сухая.</p>';
+}
 function li(a){return '<ul>'+a.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul>'}
 function renderFood(){
- var f=FOOD[S.goal],c=calc();
+ var f=FOOD[S.goal];renderMenu();
  $('foodT').textContent=f.t;
- $('foodBox').innerHTML='<p><span class="tag">≈ '+Math.round(c.kc/10)*10+' ккал</span><span class="tag">белок ≈ '+Math.round(c.pr)+' г</span></p>'+
- '<b>Белки</b>'+li(f.p)+'<b>Углеводы</b>'+li(f.c)+'<b>Овощи, фрукты, жиры</b>'+li(f.v)+'<b>Блюда</b>'+li(f.d)+'<p class="mu">'+f.t+'</p>'+
+ $('foodBox').innerHTML=
+ '<b>Белки</b>'+li(f.p)+'<b>Углеводы</b>'+li(f.c)+'<b>Овощи, фрукты, жиры</b>'+li(f.v)+'<b>Блюда</b>'+li(f.d)+'<p class="mu">'+f.n+'</p>'+
  '<p class="mu">Цель можно сменить во вкладке «Параметры».</p>';
 }
 
@@ -447,7 +480,50 @@ $('add').onclick=function(){cups++;saveCups();renderWater()};
 $('undo').onclick=function(){if(cups>0)cups--;saveCups();renderWater()};
 
 /* общее */
-function renderAll(){renderStats();renderSleep();renderFood();renderWater();renderEx()}
+/* программа: сплит по числу тренировок, подходы и отдых по цели и уровню, длина под ваше время */
+var TPL={A:['Всё тело A',['Приседания','Отжимания','Тяга рюкзака в наклоне','Ягодичный мостик','Планка','Скалолаз']],
+ B:['Всё тело B',['Выпады','Отжимания «горка»','Лодочка (супермен)','Сгибание рук с рюкзаком','Отжимания от стула','Скручивания','Прыжки «звёздочка»']],
+ C:['Всё тело C',['Приседания','Алмазные отжимания','Тяга рюкзака в наклоне','Подъём на носки','Подъём ног лёжа','Бёрпи']],
+ U:['Верх тела',['Отжимания','Тяга рюкзака в наклоне','Отжимания «горка»','Подъём рук с бутылками','Сгибание рук с рюкзаком','Отжимания от стула','Планка']],
+ L:['Ноги и пресс',['Приседания','Выпады','Ягодичный мостик','Подъём на носки','Подъём ног лёжа','Скручивания']],
+ U2:['Верх тела 2',['Алмазные отжимания','Лодочка (супермен)','Подъём рук с бутылками','Тяга рюкзака в наклоне','Сгибание рук с рюкзаком','Скалолаз']],
+ L2:['Ноги 2',['Выпады','Приседания','Ягодичный мостик','Подъём на носки','Планка','Бег с высокими коленями']],
+ K:['Кардио и пресс',['Прыжки «звёздочка»','Бег с высокими коленями','Бёрпи','Скалолаз','Планка','Скручивания']]};
+var SPL={2:[[0,'A'],[3,'B']],3:[[0,'A'],[2,'B'],[4,'C']],4:[[0,'U'],[1,'L'],[3,'U2'],[4,'L2']],5:[[0,'U'],[1,'L'],[2,'K'],[4,'U2'],[5,'L2']]};
+var SOFT={'Прыжки «звёздочка»':'Подъём на носки','Бёрпи':'Скалолаз','Бег с высокими коленями':'Ягодичный мостик'},WD=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+function exByName(n){for(var i=0;i<X.length;i++)if(X[i][0]===n)return X[i]}
+function renderProg(){
+ var c=calc(),cut=S.goal==='cut',L={beg:0,mid:1,adv:2}[S.lvl],sets=cut?[2,3,4][L]:[3,4,5][L],rest=cut?45:[60,90,120][L],
+  per=sets*(.8+rest/60),dur=+S.dur,td=(new Date().getDay()+6)%7,plan=SPL[S.days]||SPL[3],used={};
+ var h=plan.map(function(p){
+  var t=TPL[p[1]],list=[];
+  t[1].forEach(function(n){if(c.soft&&SOFT[n])n=SOFT[n];if(list.indexOf(n)<0)list.push(n)});
+  while(list.length>3&&8+list.length*per>dur)list.pop();
+  used[p[0]]=1;
+  return '<div class="day"><h3><span'+(p[0]===td?' class="today"':'')+'>'+WD[p[0]]+' · '+t[0]+(p[0]===td?' (сегодня)':'')+'</span><i>≈ '+Math.round(8+list.length*per)+' мин</i></h3>'+
+   list.map(function(n){var x=exByName(n),r=x[2].split('×')[1];return '<div class="exr"><button class="exb" data-n="'+n+'">'+n+'</button><span>'+sets+'×'+r+'</span></div>'}).join('')+'</div>';
+ }).join('');
+ var off=WD.filter(function(d,i){return !used[i]}).join(', ');
+ var tips=[(cut?'Отдых между подходами '+rest+' сек: так выше пульс и расход калорий.':'Отдых между подходами '+rest+' сек, опускайтесь медленно, за 2–3 секунды.'),
+  'Перед тренировкой разминка 5 минут, после — растяжка 3 минуты.',
+  L===0?'Первые 2 недели делайте упражнения в лёгком варианте: отжимания с колен, приседания до удобной глубины.':'Каждую неделю добавляйте 1–2 повтора. Стало легко на верхней границе — добавьте подход или книги в рюкзак.',
+  cut?'После силовой: 15–20 минут быстрой ходьбы.':'Кардио немного: 1–2 прогулки по 30 минут в неделю, чтобы не мешать росту мышц.'];
+ if(c.soft)tips.push('Прыжки заменены на упражнения без ударной нагрузки на суставы.');
+ $('prog').innerHTML='<div class="card"><h2>Ваша программа: '+S.days+(S.days<5?' тренировки':' тренировок')+' в неделю</h2><p class="mu">Цель: '+(cut?'сжечь жир':'набрать мышцы')+' · уровень: '+['новичок','средний','опытный'][L]+' · до '+dur+' мин. Нажмите на упражнение, чтобы увидеть технику.</p>'+h+
+  '<div class="day"><h3><span>'+off+' · отдых</span></h3><div class="mu">Прогулка '+(cut?'8–10':'6–8')+' тыс. шагов, сон '+fmt(+S.sl)+' ч.</div></div>'+li(tips)+'</div>';
+}
+function openBig(x){build($('bigsv'),x);pose($('bigsv'),x.c[0],0);$('bigt').textContent=x[0];$('bigm').innerHTML=musTxt(x);$('bigd').textContent=x[3];$('big').hidden=false}
+$('prog').addEventListener('click',function(e){var b=e.target.closest('.exb');if(b)openBig(exByName(b.getAttribute('data-n')))});
+document.addEventListener('click',function(e){var b=e.target.closest('[data-go]');if(b)document.querySelector('nav [data-t="'+b.getAttribute('data-go')+'"]').click()});
+/* автоматический пересчёт при вводе; явные опечатки (рост 17, вес 7000) не применяем */
+var LIM={h:[120,230],w:[30,250],age:[12,90],sl:[4,12],dur:[10,180]};
+function live(){
+ ids.forEach(function(k){var v=$(k).value,l=LIM[k];if(v===''||l&&(+v<l[0]||+v>l[1]))return;S[k]=v});
+ try{localStorage.setItem('fit_s',JSON.stringify(S))}catch(e){}
+ renderStats();renderSleep();renderFood();renderWater();renderProg();
+}
+ids.forEach(function(k){$(k).addEventListener('input',live);$(k).addEventListener('change',live)});
+function renderAll(){renderStats();renderSleep();renderFood();renderWater();renderProg();renderEx()}
 $('save').onclick=function(){
  ids.forEach(function(k){S[k]=$(k).value||DEF[k]});
  try{localStorage.setItem('fit_s',JSON.stringify(S))}catch(e){}
