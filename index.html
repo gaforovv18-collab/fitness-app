@@ -78,6 +78,7 @@ label.btn2{display:inline-block;margin:0}input[hidden]{display:none}
 
 <section class="sec on" id="s-today">
  <div class="hello"><div><div class="mu" id="tDate"></div><h2 style="margin:0;font-size:22px">Сегодня</h2></div><span class="streak" id="tStreak"></span></div>
+ <div id="move"></div>
  <div id="inst"></div>
  <div class="card" id="tWork"></div>
  <div id="tWeigh"></div>
@@ -628,7 +629,7 @@ document.addEventListener('click',function(e){var b=e.target.closest('[data-go]'
 /* автоматический пересчёт при вводе; явные опечатки (рост 17, вес 7000) не применяем */
 var LIM={h:[120,230],w:[30,250],age:[12,90],sl:[4,12],dur:[10,180]};
 /* ===== хранилище и мелочи ===== */
-var VER='2.1.0',REPO='https://github.com/gaforovv18-collab/fitness-app';
+var VER='2.2.0',REPO='https://github.com/gaforovv18-collab/fitness-app';
 function ld(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
 function sv(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 function iso(d){d=d||new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
@@ -703,13 +704,14 @@ function renderToday(){
  $('tFood').innerHTML='<h2>Питание</h2><p><span class="tag">≈ '+r10(M.c.kc)+' ккал</span><span class="tag">белок '+Math.round(M.c.pr)+' г</span></p>'+
   M.meals.map(function(m){return '<div class="exr"><span>'+m.n+': '+m.it.map(function(i){return i.nm.toLowerCase().replace(/ \(.*\)/,'')}).join(', ')+'</span><span class="mu">'+r10(m.kc)+'</span></div>'}).join('')+
   '<div class="btns"><button class="btn2" data-go="food">Меню с граммовкой</button></div>';
- renderInstall();
+ renderInstall();renderMove();
 }
 
 /* ===== подсказка об установке ===== */
 var BIP=null;
 addEventListener('beforeinstallprompt',function(e){e.preventDefault();BIP=e;renderInstall()});
 function renderInstall(){
+ if(OLDHOST){$('inst').innerHTML='';return}
  var inst=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone;
  if(inst||ld('fit_noinst',0)){$('inst').innerHTML='';return}
  var ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
@@ -922,6 +924,7 @@ function pushTxt(){
 }
 function pushSoon(){clearTimeout(pushT);pushT=setTimeout(pushSync,2500)}
 function pushSync(force){
+ if(ld('fit_moved',0))return;
  if(!pushCan()||Notification.permission!=='granted'){permTxt();return}
  var ev=events().map(function(e){return{m:e.m,t:e.ic+' '+e.t,b:e.b}}),tz='UTC';
  try{tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC'}catch(e){}
@@ -938,9 +941,34 @@ function pushOff(){
  try{navigator.serviceWorker.ready.then(function(r){return r.pushManager.getSubscription()}).then(function(x){x&&x.unsubscribe()})}catch(e){}
 }
 
+/* ===== переезд со старого адреса GitHub Pages: данные передаются в адресе ссылки, без сервера ===== */
+var NEWURL='https://fitness-makedon.pages.dev/',OLDHOST=/github\.io$/.test(location.hostname);
+function moveOut(){
+ var o={};Object.keys(localStorage).forEach(function(k){if(k.indexOf('fit_')===0&&['fit_psh','fit_pid','fit_moved','fit_noinst'].indexOf(k)<0)o[k]=localStorage.getItem(k)});
+ pushOff();sv('fit_moved',1);PUSHON=false;
+ location.href=NEWURL+'#import='+encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(o)))));
+}
+function moveIn(){
+ var m=location.hash.match(/^#import=(.+)$/);if(!m)return false;
+ history.replaceState(null,'',location.pathname+location.search);
+ try{
+  var o=JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(m[1])))));
+  if(localStorage.getItem('fit_onb')&&!confirm('На этом адресе уже есть данные. Заменить их данными со старого адреса?'))return false;
+  Object.keys(o).forEach(function(k){if(k.indexOf('fit_')===0)localStorage.setItem(k,o[k])});sv('fit_onb',1);sv('fit_movedin',1);
+  location.reload();return true;
+ }catch(e){msg('Не удалось перенести данные. Сохраните копию на старом адресе и загрузите её здесь.');return false}
+}
+function renderMove(){
+ if(!OLDHOST){$('move').innerHTML=ld('fit_movedin',0)?'<div class="card"><h2>Данные перенесены</h2><p class="mu">Всё на месте. Удалите старую иконку с экрана телефона и установите приложение с этого адреса, затем в «Профиле» включите уведомления.</p><button class="btn2" id="moveOk">Понятно</button></div>':'';return}
+ $('move').innerHTML='<div class="card"><h2>Приложение переехало</h2><p>Новый адрес: <b>fitness-makedon.pages.dev</b>. Здесь приложение больше не будет обновляться.</p><button class="btn wide" id="moveGo">Перенести данные и открыть новый адрес</button><p class="mu">Все ваши данные перенесутся сами, а напоминания со старого адреса отключатся, чтобы не приходили дважды.</p></div>';
+}
+$('move').addEventListener('click',function(e){if(e.target.id==='moveGo')moveOut();if(e.target.id==='moveOk'){localStorage.removeItem('fit_movedin');renderMove()}});
+
 /* ===== запуск ===== */
+if(!moveIn()){
 fill();renderAll();permTxt();check();setInterval(check,15000);
 var hh=location.hash.slice(1);hh={water:'today',sleep:'today'}[hh]||hh;if(hh)go(hh);
 if(!ld('fit_onb',0)&&!/nowiz/.test(location.search)||/[?&]wiz/.test(location.search))wizOpen();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').then(function(){pushSync()}).catch(function(){});
+}
 </script></body></html>
