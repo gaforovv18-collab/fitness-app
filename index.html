@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="ru"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#16a34a"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><title>Мой фитнес-помощник</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#000000"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><title>Мой фитнес-помощник</title>
 <style>
-:root{--bg:#f6f7f9;--card:#fff;--tx:#1b1f24;--mu:#66707c;--ac:#16a34a;--ac2:#e8f7ee;--bd:#e3e6ea;--wa:#0ea5e9;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101316;--card:#1a1f24;--tx:#eceff2;--mu:#98a2ad;--ac:#34d399;--ac2:#14352a;--bd:#2a3138;--wa:#38bdf8}}
-:root[data-theme="dark"]{--bg:#101316;--card:#1a1f24;--tx:#eceff2;--mu:#98a2ad;--ac:#34d399;--ac2:#14352a;--bd:#2a3138;--wa:#38bdf8}
+:root{--bg:#f4f6fb;--card:#fff;--tx:#0a0a0a;--mu:#5b6472;--ac:#2563eb;--ac2:#e8efff;--bd:#e2e6ef;--wa:#2563eb;--on:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#000;--card:#0e1116;--tx:#fff;--mu:#9aa3b2;--ac:#3b82f6;--ac2:#0c1a33;--bd:#1f2633;--wa:#60a5fa;--on:#fff}}
+:root[data-theme="dark"]{--bg:#000;--card:#0e1116;--tx:#fff;--mu:#9aa3b2;--ac:#3b82f6;--ac2:#0c1a33;--bd:#1f2633;--wa:#60a5fa;--on:#fff}
 *{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 main{max-width:720px;margin:0 auto;padding:14px 14px 90px}
@@ -13,16 +13,19 @@ h1{font-size:20px;margin:6px 0 12px}h2{font-size:17px;margin:0 0 8px}
 .card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:12px}
 nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--bd);display:flex;padding-bottom:env(safe-area-inset-bottom,0px);z-index:5}
 nav button{flex:1;border:0;background:none;color:var(--mu);padding:9px 2px;font-size:11px;cursor:pointer}
-nav button b{display:block;font-size:20px;font-weight:400}nav button.on{color:var(--ac);font-weight:600}
+nav button svg{display:block;margin:0 auto 3px;width:24px;height:24px}.ic{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+h1{display:flex;align-items:center;gap:8px}h1 svg{width:28px;height:28px;color:var(--ac)}
+.cup{display:inline-block;width:14px;height:18px;margin:0 3px 3px 0;border-radius:3px 3px 6px 6px;background:var(--wa)}
+.g.g1{grid-template-columns:minmax(0,1fr)}.rt{display:flex;gap:6px}.play svg{width:14px;height:14px;fill:currentColor;display:block;margin:auto}.rt select{flex:1}.play{flex:0 0 42px;border:1px solid var(--ac);background:none;color:var(--ac);border-radius:9px;cursor:pointer;font-size:14px}.play:active{background:var(--ac);color:var(--on)}nav button.on{color:var(--ac);font-weight:600}
 .g{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px 12px}.g>div{min-width:0}
 label{font-size:13px;color:var(--mu);display:block}
 input,select{width:100%;min-width:0;max-width:100%;display:block;box-sizing:border-box;margin:0;padding:9px;border:1px solid var(--bd);border-radius:9px;background:var(--bg);color:var(--tx);font-size:16px}
 input[type=time]{-webkit-appearance:none;appearance:none;min-height:42px;text-align:left}input::-webkit-date-and-time-value{text-align:left}
 .big{font-size:28px;font-weight:700;color:var(--ac)}.mu{color:var(--mu);font-size:13px}
-.btn{background:var(--ac);color:#04200f;border:0;border-radius:10px;padding:10px 14px;font-weight:600;cursor:pointer;font-size:15px}
+.btn{background:var(--ac);color:var(--on);border:0;border-radius:10px;padding:10px 14px;font-weight:600;cursor:pointer;font-size:15px}
 .chips{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;padding-bottom:4px}
 .chip{border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:20px;padding:6px 12px;white-space:nowrap;cursor:pointer;font-size:14px}
-.chip.on{background:var(--ac);color:#04200f;border-color:var(--ac)}
+.chip.on{background:var(--ac);color:var(--on);border-color:var(--ac)}
 .ex{display:flex;gap:12px;align-items:center}.ex svg{flex:0 0 46%;width:46%;max-width:240px;aspect-ratio:10/7;height:auto;background:var(--ac2);border-radius:10px}.ex>div{flex:1;min-width:0;overflow-wrap:break-word}.ex svg{cursor:zoom-in}
 .mus{margin:4px 0 2px;font-size:13px}.mus span{display:inline-block;margin-right:8px;color:#e11d1d;font-weight:600}.mus span::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:#e11d1d;margin-right:4px}
 #big{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:20;display:flex;align-items:center;justify-content:center;padding:16px}#big[hidden]{display:none}
@@ -31,7 +34,7 @@ input[type=time]{-webkit-appearance:none;appearance:none;min-height:42px;text-al
 .tag{display:inline-block;background:var(--ac2);color:var(--ac);border-radius:6px;padding:1px 7px;font-size:12px;margin-right:4px}
 ul{margin:4px 0;padding-left:20px}li{margin:2px 0}
 .bar{height:14px;background:var(--bd);border-radius:8px;overflow:hidden;margin:8px 0}.bar i{display:block;height:100%;background:var(--wa);width:0;transition:width .3s}
-#toast{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:12px;right:12px;max-width:600px;margin:auto;background:var(--ac);color:#04200f;padding:12px 14px;border-radius:12px;font-weight:600;display:none;z-index:9}
+#toast{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:12px;right:12px;max-width:600px;margin:auto;background:var(--ac);color:var(--on);padding:12px 14px;border-radius:12px;font-weight:600;display:none;z-index:9}
 .sec{display:none}.sec.on{display:block}
 .row{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--bd)}.row:last-child{border:0}
 </style></head><body>
@@ -39,7 +42,7 @@ ul{margin:4px 0;padding-left:20px}li{margin:2px 0}
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><radialGradient id="gsh" cx=".38" cy=".3" r=".8"><stop offset="0" stop-color="#fff" stop-opacity=".5"/><stop offset=".35" stop-color="#fff" stop-opacity=".08"/><stop offset=".7" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".38"/></radialGradient></defs></svg>
 <div id="big" hidden><div class="bigc"><button id="bigx" aria-label="Закрыть">✕</button><svg viewBox="0 0 100 70" id="bigsv"></svg><h2 id="bigt" style="margin-top:10px"></h2><div id="bigm"></div><div class="mu" id="bigd"></div></div></div>
 <main>
-<h1>💪 Мой фитнес-помощник</h1>
+<h1><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/></svg>Мой фитнес-помощник</h1>
 
 <section class="sec on" id="s-set">
  <div class="card"><h2>Мои параметры</h2>
@@ -58,11 +61,20 @@ ul{margin:4px 0;padding-left:20px}li{margin:2px 0}
   <p><button class="btn" id="save">Сохранить и включить уведомления</button></p>
   <p class="mu" id="perm"></p>
  </div>
+ <div class="card"><h2>Мелодии уведомлений</h2>
+  <div class="g g1">
+   <div><label>Сон</label><div class="rt"><select id="rs"></select><button class="play" data-r="rs" aria-label="Прослушать"><svg viewBox="0 0 14 14"><path d="M3 1.5v11l9.5-5.5z"/></svg></button></div></div>
+   <div><label>Подъём</label><div class="rt"><select id="rw"></select><button class="play" data-r="rw" aria-label="Прослушать"><svg viewBox="0 0 14 14"><path d="M3 1.5v11l9.5-5.5z"/></svg></button></div></div>
+   <div><label>Тренировка</label><div class="rt"><select id="rt"></select><button class="play" data-r="rt" aria-label="Прослушать"><svg viewBox="0 0 14 14"><path d="M3 1.5v11l9.5-5.5z"/></svg></button></div></div>
+   <div><label>Вода</label><div class="rt"><select id="rv"></select><button class="play" data-r="rv" aria-label="Прослушать"><svg viewBox="0 0 14 14"><path d="M3 1.5v11l9.5-5.5z"/></svg></button></div></div>
+  </div>
+  <p class="mu">Мелодия звучит, пока приложение открыто или свёрнуто. Системные уведомления телефона приходят со стандартным звуком: браузер не даёт сайтам менять его.</p>
+ </div>
  <div class="card"><h2>Мои показатели</h2><div id="stats"></div></div>
 </section>
 
 <section class="sec" id="s-sleep">
- <div class="card"><h2>😴 Сон</h2><div id="sleepBox"></div></div>
+ <div class="card"><h2>Сон</h2><div id="sleepBox"></div></div>
  <div class="card"><h2>Ближайшие напоминания</h2><div id="sched"></div></div>
 </section>
 
@@ -76,7 +88,7 @@ ul{margin:4px 0;padding-left:20px}li{margin:2px 0}
 </section>
 
 <section class="sec" id="s-water">
- <div class="card"><h2>💧 Вода сегодня</h2>
+ <div class="card"><h2>Вода сегодня</h2>
   <div class="big" id="wNeed"></div><div class="mu" id="wSub"></div>
   <div class="bar"><i id="wBar"></i></div>
   <div id="wDone" style="margin-bottom:8px"></div>
@@ -88,19 +100,19 @@ ul{margin:4px 0;padding-left:20px}li{margin:2px 0}
 </main>
 
 <nav id="nav">
- <button data-t="set" class="on"><b>⚙️</b>Параметры</button>
- <button data-t="sleep"><b>😴</b>Сон</button>
- <button data-t="train"><b>🏋️</b>Тренировки</button>
- <button data-t="food"><b>🥗</b>Питание</button>
- <button data-t="water"><b>💧</b>Вода</button>
+ <button data-t="set" class="on"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="16" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="15" cy="18" r="2"/><path d="M4 6h10M18 6h2M4 12h3M11 12h9M4 18h9M17 18h3"/></svg>Параметры</button>
+ <button data-t="sleep"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>Сон</button>
+ <button data-t="train"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/></svg>Тренировки</button>
+ <button data-t="food"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7.5c-1.6-1.3-5.2-1.4-6.6 1.6S5 16.2 7.4 19c1.6 1.8 3.1 1.4 4.6.7 1.5.7 3 1.1 4.6-.7 2.4-2.8 3.4-6.9 2-9.9s-5-2.9-6.6-1.6zM12 7.5C12 5.4 13 4 15 3.2"/></svg>Питание</button>
+ <button data-t="water"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/></svg>Вода</button>
 </nav>
 
 <script>
 var $=function(i){return document.getElementById(i)};
-var DEF={h:175,w:75,age:25,sex:'m',goal:'cut',sl:8,wake:'07:00',tr:'18:00',dur:45,wr:'1'};
+var DEF={h:175,w:75,age:25,sex:'m',goal:'cut',sl:8,wake:'07:00',tr:'18:00',dur:45,wr:'1',rs:'soft',rw:'morning',rt:'power',rv:'drop'};
 var S=Object.assign({},DEF);
 try{var r=localStorage.getItem('fit_s');if(r)S=Object.assign(S,JSON.parse(r))}catch(e){}
-var ids=['h','w','age','sex','goal','sl','wake','tr','dur','wr'];
+var ids=['h','w','age','sex','goal','sl','wake','tr','dur','wr','rs','rw','rt','rv'];
 function fill(){ids.forEach(function(k){$(k).value=S[k]})}
 function pad(n){return (n<10?'0':'')+n}
 function toMin(t){var p=t.split(':');return +p[0]*60+ +p[1]}
@@ -143,17 +155,17 @@ function renderSleep(){
  '<li>Ложитесь и вставайте в одно время, даже в выходные.</li></ul>';
  var ev=events().sort(function(a,b){return a.m-b.m});
  var now=new Date(),nm=now.getHours()*60+now.getMinutes();
- $('sched').innerHTML=ev.map(function(e){return '<div class="row"><span>'+e.ic+' '+e.t+'</span><b>'+fromMin(e.m)+'</b></div>'}).join('')+
+ $('sched').innerHTML=ev.map(function(e){return '<div class="row"><span>'+e.t+'</span><b>'+fromMin(e.m)+'</b></div>'}).join('')+
  '<p class="mu">Уведомления приходят, пока приложение открыто во вкладке или в фоне браузера. Для надёжности добавьте страницу на главный экран.</p>';
 }
 function events(){
  var wake=toMin(S.wake),bed=wake-Math.round(+S.sl*60),tr=toMin(S.tr),L=[];
- L.push({id:'b30',m:(bed-30+1440)%1440,ic:'🌙',t:'Скоро спать',b:'Через 30 минут пора ложиться: уберите телефон.'});
- L.push({id:'bed',m:(bed+1440)%1440,ic:'😴',t:'Пора спать',b:'Ложитесь. Нужно поспать '+fmt(+S.sl)+' ч, подъём в '+S.wake+'.'});
- L.push({id:'wk',m:wake,ic:'☀️',t:'Доброе утро',b:'Выпейте стакан воды и сделайте зарядку.'});
- L.push({id:'tr15',m:(tr-15+1440)%1440,ic:'🏋️',t:'Скоро тренировка',b:'Через 15 минут тренировка: переоденьтесь, выпейте воды.'});
- L.push({id:'tr',m:tr,ic:'🔥',t:'Время тренировки',b:'Начинаем! Откройте раздел «Тренировки».'});
- if(S.wr==='1'){for(var m=wake+120,i=1;m<bed-120+(bed<wake?1440:0)&&i<8;m+=120,i++)L.push({id:'w'+i,m:m%1440,ic:'💧',t:'Выпейте воды',b:'Выпейте стакан воды. Норма сегодня ≈ '+fmt(calc().water)+' л.'})}
+ L.push({id:'b30',r:'rs',m:(bed-30+1440)%1440,ic:'🌙',t:'Скоро спать',b:'Через 30 минут пора ложиться: уберите телефон.'});
+ L.push({id:'bed',r:'rs',m:(bed+1440)%1440,ic:'😴',t:'Пора спать',b:'Ложитесь. Нужно поспать '+fmt(+S.sl)+' ч, подъём в '+S.wake+'.'});
+ L.push({id:'wk',r:'rw',m:wake,ic:'☀️',t:'Доброе утро',b:'Выпейте стакан воды и сделайте зарядку.'});
+ L.push({id:'tr15',r:'rt',m:(tr-15+1440)%1440,ic:'🏋️',t:'Скоро тренировка',b:'Через 15 минут тренировка: переоденьтесь, выпейте воды.'});
+ L.push({id:'tr',r:'rt',m:tr,ic:'🔥',t:'Время тренировки',b:'Начинаем! Откройте раздел «Тренировки».'});
+ if(S.wr==='1'){for(var m=wake+120,i=1;m<bed-120+(bed<wake?1440:0)&&i<8;m+=120,i++)L.push({id:'w'+i,r:'rv',m:m%1440,ic:'💧',t:'Выпейте воды',b:'Выпейте стакан воды. Норма сегодня ≈ '+fmt(calc().water)+' л.'})}
  return L;
 }
 var fired={};try{fired=JSON.parse(localStorage.getItem('fit_f')||'{}')}catch(e){}
@@ -161,15 +173,38 @@ function check(){
  var n=new Date(),k=n.getHours()*60+n.getMinutes(),d=n.toDateString();
  events().forEach(function(e){
   var key=d+e.id;
-  if(e.m===k&&!fired[key]){fired={};fired[key]=1;try{localStorage.setItem('fit_f',JSON.stringify(fired))}catch(x){}notify(e.ic+' '+e.t,e.b)}
+  if(e.m===k&&!fired[key]){fired={};fired[key]=1;try{localStorage.setItem('fit_f',JSON.stringify(fired))}catch(x){}notify(e.ic+' '+e.t,e.b,S[e.r])}
  });
 }
-function beep(){try{var c=new (window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=880;g.gain.value=.15;o.start();setTimeout(function(){o.stop();c.close()},400)}catch(e){}}
-function notify(t,b){
+/* мелодии уведомлений: синтез через Web Audio, без звуковых файлов. Нота: [начало, частота, длительность, частота в конце] */
+var RT={
+ soft:['Мягкий колокол','sine',[[0,659,1.6],[.4,880,1.9]]],
+ morning:['Утро','triangle',[[0,523,.4],[.18,659,.4],[.36,784,.4],[.54,1047,1.1]]],
+ power:['Мотивация','square',[[0,392,.14],[.16,392,.14],[.32,523,.18],[.52,659,.18],[.72,784,.6]]],
+ drop:['Капля','sine',[[0,1500,.16,650],[.28,1250,.18,560]]],
+ bell:['Колокольчик','sine',[[0,1319,1.2],[.12,1568,1.2],[.24,2093,1.5]]],
+ zen:['Тишина','sine',[[0,440,2.2],[.05,660,2.2],[.6,554,2]]],
+ alarm:['Будильник','square',[[0,880,.1],[.14,880,.1],[.28,880,.1],[.6,880,.1],[.74,880,.1],[.88,880,.1]]],
+ none:['Без звука','sine',[]]};
+var AC=null;
+function audio(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume()}catch(e){}return AC}
+function ring(id){
+ var r=RT[id]||RT.soft,c=audio();if(!c||!r[2].length)return;
+ var t0=c.currentTime+.05,out=c.createGain(),sq=r[1]==='square';out.gain.value=sq?.12:.35;out.connect(c.destination);
+ r[2].forEach(function(n){var t=t0+n[0];[[1,1],[2.76,.25]].slice(0,sq?1:2).forEach(function(h){
+  var o=c.createOscillator(),g=c.createGain();o.type=r[1];o.frequency.setValueAtTime(n[1]*h[0],t);if(n[3])o.frequency.exponentialRampToValueAtTime(n[3]*h[0],t+n[2]);
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(h[1],t+.012);g.gain.exponentialRampToValueAtTime(.0001,t+n[2]);
+  o.connect(g);g.connect(out);o.start(t);o.stop(t+n[2]+.05)})});
+}
+['rs','rw','rt','rv'].forEach(function(k){$(k).innerHTML=Object.keys(RT).map(function(id){return '<option value="'+id+'">'+RT[id][0]+'</option>'}).join('');
+ $(k).onchange=function(){S[k]=this.value;try{localStorage.setItem('fit_s',JSON.stringify(S))}catch(e){}ring(S[k])}});
+document.querySelectorAll('.play').forEach(function(b){b.onclick=function(){ring($(b.getAttribute('data-r')).value)}});
+document.addEventListener('pointerdown',audio,{once:true});
+function notify(t,b,snd){
  var el=$('toast');el.textContent=t+' — '+b;el.style.display='block';setTimeout(function(){el.style.display='none'},9000);
  try{if(window.Notification&&Notification.permission==='granted')new Notification(t,{body:b})}catch(e){}
  try{if(navigator.vibrate)navigator.vibrate([200,100,200])}catch(e){}
- beep();
+ ring(snd);
 }
 function permTxt(){var p='';try{p=window.Notification?Notification.permission:'none'}catch(e){p='none'}
  $('perm').textContent=p==='granted'?'Системные уведомления включены.':p==='denied'?'Уведомления заблокированы в браузере: напоминания будут показываться внутри приложения со звуком.':'Нажмите «Сохранить», чтобы разрешить уведомления.'}
@@ -376,13 +411,13 @@ requestAnimationFrame(anim);
 
 /* питание */
 var FOOD={
-cut:{t:'🔥 Питание для сжигания жира',
+cut:{t:'Питание для сжигания жира',
  p:['Куриная грудка, индейка','Яйца (белок + 1 желток)','Нежирный творог, греческий йогурт','Белая рыба: треска, хек, судак','Тунец, кальмары, креветки'],
  c:['Овсянка на воде','Гречка','Бурый рис, булгур','Чечевица, нут, фасоль','Цельнозерновой хлеб (немного)'],
  v:['Огурцы, помидоры, капуста','Брокколи, цветная капуста','Шпинат, зелень, сельдерей','Грейпфрут, яблоки, ягоды'],
  d:['Овсянка с ягодами и творогом на завтрак','Куриная грудка на гриле с овощами и гречкой','Запечённая рыба с брокколи','Омлет из 3 белков со шпинатом','Суп-пюре из чечевицы','Салат из тунца с огурцами и яйцом'],
  t:'Дефицит калорий небольшой (−400–500 ккал), белок высокий, сахар и сладкие напитки сведены к минимуму. Зелёный чай и вода хорошо помогают контролировать аппетит. Жир «точечно» не сжигается: он уходит равномерно.'},
-gain:{t:'💪 Питание для набора мышц',
+gain:{t:'Питание для набора мышц',
  p:['Говядина, постная баранина','Куриные бёдра и грудка','Яйца целиком (3–4 в день)','Творог, кефир, молоко','Рыба: лосось, скумбрия, сардины'],
  c:['Рис, гречка, макароны из твёрдых сортов','Картофель, батат','Овсянка на молоке','Бананы, финики, сухофрукты','Цельнозерновой хлеб'],
  v:['Овощи к каждому приёму пищи','Авокадо, орехи (миндаль, грецкий)','Арахисовая паста','Оливковое масло (1–2 ложки)'],
@@ -406,7 +441,7 @@ function renderWater(){
  $('wNeed').textContent=fmt(need)+' л в день';
  $('wSub').textContent='Это около '+n+' стаканов по 250 мл. Выпито: '+fmt(got)+' л';
  $('wBar').style.width=Math.min(100,got/need*100)+'%';
- $('wDone').textContent=cups?'💧'.repeat(Math.min(cups,24)):'Пока ни одного стакана';
+ $('wDone').innerHTML=cups?new Array(Math.min(cups,24)+1).join('<i class="cup"></i>'):'Пока ни одного стакана';
 }
 $('add').onclick=function(){cups++;saveCups();renderWater()};
 $('undo').onclick=function(){if(cups>0)cups--;saveCups();renderWater()};
@@ -417,7 +452,7 @@ $('save').onclick=function(){
  ids.forEach(function(k){S[k]=$(k).value||DEF[k]});
  try{localStorage.setItem('fit_s',JSON.stringify(S))}catch(e){}
  try{if(window.Notification&&Notification.permission==='default')Notification.requestPermission().then(permTxt)}catch(e){}
- renderAll();permTxt();notify('✅ Сохранено','Уведомления настроены: сон, тренировка, вода.');
+ renderAll();permTxt();notify('Сохранено','Уведомления настроены: сон, тренировка, вода.','none');
 };
 $('chips').onclick=function(e){var g=e.target.getAttribute('data-g');if(g){grp=g;renderEx()}};
 $('nav').onclick=function(e){var b=e.target.closest('button');if(!b)return;var t=b.getAttribute('data-t');
